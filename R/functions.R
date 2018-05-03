@@ -141,6 +141,78 @@ ggplot_reads <- function(sam)
 }
 
 
+#' Compute the nucleotide depth
+#'
+#' @export
+#' @param sam sam file object (dataframe)
+#' @return A nucleotide depth object
+read_depth <- function(sam)
+{
+  sam %>%
+    dplyr::filter(type == "M") %>%
+    dplyr::mutate(start = pos + start_hpv - 1,
+                  end = pos + end_hpv - 1) %>%
+    dplyr::mutate(base = purrr::map2(start, end, base::seq)) %>%
+    dplyr::group_by(genotype) %>%
+    dplyr::do(data = .$base %>%
+              unlist %>%
+              tibble::tibble(pos = .) %>%
+              dplyr::count(pos) %>%
+              tidyr::complete(pos = 1:max(pos), fill = list(n = 0))) %>%
+    tidyr::unnest()
+}
+
+
+#' Normalise nucleotide depth using a normalization map
+#'
+#' @export
+#' @param depths A nucleotide depth object
+#' @param qc_norm A normalization map
+#' @return A normalized depth object
+normalise_depth <- function(depths, qc_norm)
+{
+  depths %>%
+    dplyr::left_join(qc_norm, by = c("genotype", "pos")) %>%
+    dplyr::mutate(n = n.x / n.y) %>%
+    dplyr::select(-n.x, -n.y)
+}
+
+
+#' Plot the nucleotide depth
+#'
+#' @param depths A nucleotide depth object
+#' @return A nucleotide depth plot
+ggplot_depth <- function(depths)
+{
+  depths %>%
+    ggplot2::ggplot() +
+    ggplot2::aes(x = pos, y = n) +
+    ggplot2::geom_area() +
+    ggplot2::facet_grid(~genotype)
+}
+
+
+#' Compute moving average
+#'
+#' @export
+#' @param depths A nucleotide depth object
+#' @param window Half-size of the window
+MA <- function(depths, window)
+{
+  depths %>%
+    dplyr::filter(n > 0) %>%
+    split(.$genotype) %>%
+    lapply(function(x)
+           {
+             x %>%
+               dplyr::mutate(roll = pos %>% purrr::map_dbl(~mean(x$n[x$pos %in% seq(. - window, . + window)]))) %>%
+               tidyr::complete(pos = 1:max(pos), fill = list(genotype = x$genotype %>% unique,roll = 0, n = 0))
+           }) %>%
+    dplyr::bind_rows() %>%
+    dplyr::mutate(n = roll)
+}
+
+
 #' Parse a cigar string into a dataframe with type, length, start and end position
 #'
 #' @export

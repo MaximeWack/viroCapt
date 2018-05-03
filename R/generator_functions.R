@@ -101,6 +101,30 @@ Gplot_reads <- function(write = F, fastqdir = NULL, dir = NULL)
 }
 
 
+#' Generate a plot function
+#'
+#' @export
+#' @param write Write plot on disk?
+#' @param fastqdir Directory of fastq files
+#' @param dir Directory in which to write the plot if write == T
+#' @return A function accepting a depth object and fastq name and returns a plot object
+Gplot_depth <- function(write = F, fastqdir = NULL, dir = NULL)
+{
+  if (write)
+    dir.create(paste0(fastqdir, "/", dir), showWarnings = F, recursive = T)
+
+  function(sam, fastq = NULL)
+  {
+    ggplot_depth(sam) -> Plot
+
+    if (write)
+      ggplot2::ggsave(plot = Plot, filename = paste0(fastqdir, "/", dir, "/", fastq, ".png"))
+
+    Plot
+  }
+}
+
+
 #' Generate a gap plot function
 #'
 #' @export
@@ -116,6 +140,31 @@ Gplot_gaps <- function(write = F, fastqdir = NULL, dir = NULL)
   function(local_plot, features_plot, fastq = NULL)
   {
     patchwork::wrap_plots(local_plot, features_plot, ncol = 1, heights = c(.9, .1)) -> Plot
+
+    if (write)
+      ggplot2::ggsave(plot = Plot, filename = paste0(fastqdir, "/", dir, "/", fastq, ".png"))
+  }
+}
+
+
+#' Generate a final plot function
+#'
+#' @export
+#' @param write Write plot on disk?
+#' @param fastqdir Directory of fastq files
+#' @param dir Directory in which to write the plot if write == T
+#' @return A function accepting a local plot object, a blat summary, and a fastq name, and returning a plot object
+Gplot_final <- function(write = F, fastqdir = NULL, dir = NULL)
+{
+  if (write)
+    dir.create(paste0(fastqdir, "/", dir), showWarnings = F, recursive = T)
+
+  function(local_plot, summ_blat, fastq)
+  {
+    local_plot +
+      ggplot2::geom_vline(data = summ_blat %>% filter(!is.na(quality)), ggplot2::aes(xintercept = position, color = feature, alpha = quality)) +
+      ggplot2::scale_color_manual(values = c("left" = "red", "right" = "blue")) +
+      ggplot2::theme_classic() -> Plot
 
     if (write)
       ggplot2::ggsave(plot = Plot, filename = paste0(fastqdir, "/", dir, "/", fastq, ".png"))
