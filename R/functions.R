@@ -48,7 +48,7 @@ bowtie_global_align <- function(ref, fastq, threads = NA, stderr = F)
 
   system2("samtools",
           "view",
-          input = sam,
+          input = sorted_sam,
           stdout = T,
           stderr = stderr)
 }
