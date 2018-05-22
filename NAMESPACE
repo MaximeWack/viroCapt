@@ -2,6 +2,7 @@
 
 export("%>%")
 export(Gblat)
+export(Gcutadapt)
 export(Gglobal_align)
 export(Glocal_align)
 export(Gplot_depth)

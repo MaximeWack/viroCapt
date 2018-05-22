@@ -1,3 +1,31 @@
+#' Generate a cutadapt function
+#'
+#' @export
+#' @param fastqdir Directory of fastq files
+#' @param trimdir Directory of trimmed fastq files
+#' @return A function accepting a fastq filename prefix that returns trimmed fastq files
+Gcutadapt <- function(fastqdir, trimdir)
+{
+  dir.create(trimdir, showWarnings = F, recursive = T)
+
+  function(fastq)
+  {
+    out1 <- paste0(trimdir, "/", fastq, ".R1.fastq")
+    out2 <- paste0(trimdir, "/", fastq, ".R2.fastq")
+    in1 <- paste0(fastqdir, "/", fastq, ".R1.fastq")
+    in2 <- paste0(fastqdir, "/", fastq, ".R2.fastq")
+
+    system2("cutadapt",
+            c("-g ACACTCTTTCCCTACACGACGCTCTTCCGATCT",
+              "-G CGGTCTCGGCATTCCTGCTGAACCGCTCTTCCGATCT",
+              "-o ", out1,
+              "-p ", out2,
+              in1,
+              in2))
+  }
+}
+
+
 #' Generate a global_align function
 #'
 #' @export
