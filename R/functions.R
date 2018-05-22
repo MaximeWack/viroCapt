@@ -5,7 +5,7 @@
 #' @return List of filename prefixes
 list_fastq <- function(fastqdir)
 {
-  list.files(fastqdir, "*.fastq") %>%
+  list.files(fastqdir, "\\.fastq") %>%
     gsub(pattern = "\\.R\\d\\.fastq", replacement = "") %>%
     unique
 }
