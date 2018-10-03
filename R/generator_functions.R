@@ -3,8 +3,10 @@
 #' @export
 #' @param fastqdir Directory of fastq files
 #' @param trimdir Directory of trimmed fastq files
+#' @param adapt1 Adapter sequence for read1
+#' @param adapt2 Adapter sequence for read2
 #' @return A function accepting a fastq filename prefix that returns trimmed fastq files
-Gcutadapt <- function(fastqdir, trimdir)
+Gcutadapt <- function(fastqdir, trimdir, adapt1 = "ACACTCTTTCCCTACACGACGCTCTTCCGATCT", adapt2 = "CGGTCTCGGCATTCCTGCTGAACCGCTCTTCCGATCT")
 {
   dir.create(trimdir, showWarnings = F, recursive = T)
 
@@ -16,8 +18,8 @@ Gcutadapt <- function(fastqdir, trimdir)
     in2 <- paste0(fastqdir, "/", fastq, ".R2.fastq")
 
     system2("cutadapt",
-            c("-g ACACTCTTTCCCTACACGACGCTCTTCCGATCT",
-              "-G CGGTCTCGGCATTCCTGCTGAACCGCTCTTCCGATCT",
+            c(str_c("-g ", adapt1),
+              str_c("-G ", adapt2),
               "-o ", out1,
               "-p ", out2,
               in1,
@@ -189,9 +191,20 @@ Gplot_final <- function(write = F, fastqdir = NULL, dir = NULL)
 
   function(local_plot, summ_blat, fastq)
   {
+    summ_blat %>% filter(!is.na(quality), quality >= "HC") -> summ_blat
+
+    local_plot$data$n %>% max -> max_n
     local_plot +
-      ggplot2::geom_vline(data = summ_blat %>% filter(!is.na(quality)), ggplot2::aes(xintercept = position, color = feature, alpha = quality)) +
-      ggplot2::scale_color_manual(values = c("left" = "red", "right" = "blue")) +
+      ggplot2::geom_vline(data = summ_blat, ggplot2::aes(xintercept = position, color = chr, alpha = quality)) -> p
+
+    if (summ_blat %>% filter(feature == "left") %>% nrow > 0)
+      p + ggplot2::geom_segment(data = summ_blat %>% filter(feature == "left"), ggplot2::aes(x = position, xend = position - 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+
+    if (summ_blat %>% filter(feature == "right") %>% nrow > 0)
+      p + ggplot2::geom_segment(data = summ_blat %>% filter(feature == "right"), ggplot2::aes(x = position, xend = position + 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+
+    p +
+      ggplot2::scale_alpha_ordinal(limits = c("HC", "HCT"), range = c(0.5, 1)) +
       ggplot2::theme_classic() -> Plot
 
     if (write)
