@@ -5,9 +5,16 @@
 #' @return List of filename prefixes
 list_fastq <- function(fastqdir)
 {
-  list.files(fastqdir, "\\.fastq") %>%
+  list.files(fastqdir, "\\.U\\.fastq") %>%
+    gsub(pattern = "\\.U\\.fastq", replacement = "") %>%
+    unique -> single
+
+  list.files(fastqdir, "\\.R\\d\\.fastq") %>%
     gsub(pattern = "\\.R\\d\\.fastq", replacement = "") %>%
-    unique
+    unique -> pairend
+
+  data.frame(file = single, type = "U", stringsAsFactors = F, check.names = F) %>%
+    rbind(data.frame(file = pairend, type = "R", stringsAsFactors = F, check.names = F ))
 }
 
 
@@ -18,7 +25,7 @@ list_fastq <- function(fastqdir)
 #' @param threads Number of threads to use with bowtie2
 #' @param stderr Argument to system2: capture errors ?
 #' @return Raw sam file (character vector)
-bowtie_global_align <- function(ref, fastq, threads = NA, stderr = F)
+bowtie_global_align <- function(ref, fastq, threads = NA, stderr = F, pairend = T)
 {
   ref <- gsub(" ", "\\\\ ", ref)
   fastq <- gsub(" ", "\\\\ ", fastq)
@@ -26,16 +33,28 @@ bowtie_global_align <- function(ref, fastq, threads = NA, stderr = F)
 
   R1 <- paste0(fastq, ".R1.fastq")
   R2 <- paste0(fastq, ".R2.fastq")
+  U <- paste0(fastq, ".U.fastq")
 
-  system2("bowtie2",
-          c(paste0("-x '", ref, "'"),
-            paste0("-1 '", R1, "'"),
-            paste0("-2 '", R2, "'"),
-            "--no-unal",
-            "--very-sensitive",
-            paste0("-p ", threads)),
-          stdout = T,
-          stderr = stderr) -> sam
+  if (pairend)
+    system2("bowtie2",
+            c(paste0("-x '", ref, "'"),
+              paste0("-1 '", R1, "'"),
+              paste0("-2 '", R2, "'"),
+              "--no-unal",
+              "--very-sensitive",
+              paste0("-p ", threads)),
+            stdout = T,
+            stderr = stderr) -> sam
+  else
+    system2("bowtie2",
+            c(paste0("-x '", ref, "'"),
+              paste0("-U '", U, "'"),
+              "--no-unal",
+              "--very-sensitive",
+              paste0("-p ", threads)),
+            stdout = T,
+            stderr = stderr) -> sam
+
 
   system2("samtools",
           c("sort",
@@ -61,7 +80,7 @@ bowtie_global_align <- function(ref, fastq, threads = NA, stderr = F)
 #' @param threads Number of threads to use with bowtie2
 #' @param stderr Argument to system2: capture errors ?
 #' @return Raw sam file (character vector)
-bowtie_local_align <- function(ref, fastq, threads = NA, stderr = F)
+bowtie_local_align <- function(ref, fastq, threads = NA, stderr = F, pairend = T)
 {
   ref <- gsub(" ", "\\\\ ", ref)
   fastq <- gsub(" ", "\\\\ ", fastq)
@@ -69,17 +88,29 @@ bowtie_local_align <- function(ref, fastq, threads = NA, stderr = F)
 
   R1 <- paste0(fastq, ".R1.fastq")
   R2 <- paste0(fastq, ".R2.fastq")
+  U <- paste0(fastq, ".U.fastq")
 
-  system2("bowtie2",
-          c(paste0("-x '", ref, "'"),
-            paste0("-1 '", R1, "'"),
-            paste0("-2 '", R2, "'"),
-            "--local",
-            "--no-unal",
-            "--very-sensitive-local",
-            paste0("-p ", threads)),
-          stdout = T,
-          stderr = stderr) -> sam
+  if (pairend)
+    system2("bowtie2",
+            c(paste0("-x '", ref, "'"),
+              paste0("-1 '", R1, "'"),
+              paste0("-2 '", R2, "'"),
+              "--local",
+              "--no-unal",
+              "--very-sensitive-local",
+              paste0("-p ", threads)),
+            stdout = T,
+            stderr = stderr) -> sam
+  else
+    system2("bowtie2",
+            c(paste0("-x '", ref, "'"),
+              paste0("-U '", U, "'"),
+              "--local",
+              "--no-unal",
+              "--very-sensitive-local",
+              paste0("-p ", threads)),
+            stdout = T,
+            stderr = stderr) -> sam
 
   system2("samtools",
           c("sort",
