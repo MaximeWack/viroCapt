@@ -13,8 +13,12 @@ list_fastq <- function(fastqdir)
     gsub(pattern = "\\.R\\d\\.fastq", replacement = "") %>%
     unique -> pairend
 
+  if (length(single) == 0) single <- ""
+  if (length(pairend) == 0) pairend <- ""
+
   data.frame(file = single, type = "U", stringsAsFactors = F, check.names = F) %>%
-    rbind(data.frame(file = pairend, type = "R", stringsAsFactors = F, check.names = F ))
+    rbind(data.frame(file = pairend, type = "R", stringsAsFactors = F, check.names = F )) %>%
+    filter(file != "")
 }
 
 
