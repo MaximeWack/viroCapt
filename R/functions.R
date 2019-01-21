@@ -253,9 +253,11 @@ parse_cigar <- function(cigar)
 #' @return A dataframe of features with their position on HPV
 extract_features <- function(parsed_cigar, pos)
 {
+  parsed_cigar$length_read %>% sum -> read_length
+
   parsed_cigar %>%
     dplyr::mutate(feature = dplyr::case_when(type == "S" & start_read == 1 ~ "left",
-                                             type == "S" & end_read== 151 ~ "right",
+                                             type == "S" & end_read == read_length ~ "right",
                                              T ~ type),
                   feature_pos = dplyr::case_when(feature == "D" ~ pos + start_hpv - 1,
                                                  feature == "I" ~ pos + start_hpv- 2,
