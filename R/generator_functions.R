@@ -42,9 +42,10 @@ Gglobal_align <- function(HPVs, fastqdir, threads = NA, write = F, dir = NULL)
   if (write)
     dir.create(paste0(fastqdir, "/", dir), showWarnings = F, recursive = T)
 
-  function(fastq)
+  function(fastq, type)
   {
-    bowtie_global_align(HPVs, paste0(fastqdir, "/", fastq), threads) -> sam
+    pairend <- type == "R"
+    bowtie_global_align(HPVs, paste0(fastqdir, "/", fastq), threads, F, pairend) -> sam
 
     if (write)
       cat(sam, file = paste0(fastqdir, "/", dir, "/", fastq, ".sam"), sep = "\n")
@@ -70,9 +71,10 @@ Glocal_align <- function(HPVdir, fastqdir, threads = NA, write = F, dir = NULL)
   if (write)
     dir.create(paste0(fastqdir, "/", dir), showWarnings = F, recursive = T)
 
-  function(genotype, fastq)
+  function(genotype, fastq, type)
   {
-    bowtie_local_align(paste0(HPVdir, "/", genotype), paste0(fastqdir, "/", fastq), threads) -> sam
+    pairend <- type == "R"
+    bowtie_local_align(paste0(HPVdir, "/", genotype), paste0(fastqdir, "/", fastq), threads, F, pairend) -> sam
 
     if (write)
       cat(sam, file = paste0(fastqdir, "/", dir, "/", fastq, "-", genotype, ".sam"), sep = "\n")
