@@ -180,6 +180,19 @@ extract_unaligned <- function(parsed)
 }
 
 
+#' Write a fasta file from a parsed sam file
+#'
+#' @export
+#' @param parsed_sam A parsed sam object (cigar went through parse_cigar and extract_features)
+#' @param fastafile A file to write to
+write_fasta <- function(parsed_sam, fastafile)
+{
+  paste(paste0(">", parsed_sam$read, "|", parsed_sam$genotype, "|", parsed_sam$feature, "|", parsed_sam$feature_pos), parsed_sam$nalign_seq, sep = "\n", collapse = "\n") %>%
+    cat(file = fastafile)
+}
+
+
+
 #' Clean a raw blat file
 #'
 #' @export
