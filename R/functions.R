@@ -15,11 +15,11 @@ read_sam <- function(filename)
 }
 
 
-#' Compute the nucleotide depth
+#' Compute the sequencing depth
 #'
 #' @export
 #' @param sam sam file object (dataframe)
-#' @return A nucleotide depth object
+#' @return A sequencing depth object
 read_depth <- function(sam)
 {
   sam %>%
@@ -37,15 +37,14 @@ read_depth <- function(sam)
 }
 
 
-#' Normalise nucleotide depth using a normalization map
+#' Normalise a sequencing depth object using a reference
 #'
-#' @export
-#' @param depths A nucleotide depth object
-#' @param qc_norm A normalization map
-#' @return A normalized depth object
-normalise_depth <- function(depths, qc_norm)
+#' @param depth A sequencing depth object produced by read_depth
+#' @param qc_norm A normalization map for the depth object
+#' @return A normalized sequencing depth object
+normalise_depth <- function(depth, qc_norm)
 {
-  depths %>%
+  depth %>%
     dplyr::left_join(qc_norm, by = c("genotype", "pos")) %>%
     dplyr::mutate(n = n.x / n.y) %>%
     dplyr::select(-n.x, -n.y)
