@@ -52,17 +52,22 @@ normalise_depth <- function(depths, qc_norm)
 }
 
 
-#' Plot the nucleotide depth
+#' Downsample and object of sequencing depth
 #'
-#' @param depths A nucleotide depth object
-#' @return A nucleotide depth plot
-ggplot_depth <- function(depths)
+#' The sequencing depth object has a width corresponding to the length of the aligned genome (~8000bp for HPV)
+#' This is way too large for plotting on a regular screen
+#' This function allows the downsampling of a depth object to speed up other operations, such as plotting
+#'
+#' @param depth A sequencing depth object, produced by read_depth
+#' @param ratio The downsampling ratio, 5 by default
+#' @return A downsampled sequencing depth object
+downsample <- function(depth, ratio = 5)
 {
-  depths %>%
-    ggplot2::ggplot() +
-    ggplot2::aes(x = pos, y = n) +
-    ggplot2::geom_area() +
-    ggplot2::facet_grid(~genotype)
+  depth %>%
+    dplyr::mutate(pos = ( (pos / ratio) %>% ceiling) * ratio) %>%
+    dplyr::group_by(genotype, pos) %>%
+    dplyr::summarise(n = mean(n)) %>%
+    dplyr::ungroup()
 }
 
 
@@ -84,6 +89,21 @@ MA <- function(depths, window)
            }) %>%
     dplyr::bind_rows() %>%
     dplyr::mutate(n = roll)
+}
+
+
+#' Plot the nucleotide depth
+#'
+#' @param depth A sequencing depth object
+#' @return A nucleotide depth plot
+ggplot_depth <- function(depth)
+{
+  depth %>%
+    ggplot2::ggplot() +
+    ggplot2::aes(x = pos, y = n) +
+    ggplot2::geom_area() +
+    ggplot2::facet_grid(~genotype) +
+    ggplot2::theme(strip.text = ggplot2::element_text(angle = -90))
 }
 
 
