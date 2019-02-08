@@ -1,17 +1,17 @@
-#' Parse a raw sam output to a dataframe
+#' Read a headerless sam file
 #'
-#' @param rawsam Raw sam file (character vector)
-#' @return sam file object (dataframe)
-parse_sam <- function(rawsam)
+#' @export
+#' @param filename The SAM filename
+#' @return A dataframe with columns (read, genotype, pos, cigar, seq)
+read_sam <- function(filename)
 {
-  data.frame(rawsam) %>%
-    tidyr::separate(rawsam, sep = "\t", into = c("qname", "flag", "rname", "pos", "mapq", "cigar", "rnext", "pnext", "tlen", "seq", "qual")) %>%
-    dplyr::mutate(flag = flag %>% as.numeric,
-                  pos = pos %>% as.numeric,
-                  mapq = mapq  %>% as.numeric,
-                  pnext = pnext  %>% as.numeric,
-                  tlen = tlen  %>% as.numeric,
-                  rname = rname %>% factor)
+  suppressWarnings({
+  readr::read_tsv(filename,
+           col_names = c("read", "flag", "genotype", "pos", "mapq", "cigar", "rnext", "pnext", "tlen", "seq"),
+           col_types = "ciciicciic") %>%
+  dplyr::select(read, genotype, pos, cigar, seq) %>%
+  dplyr::mutate(genotype = forcats::fct_infreq(genotype))
+  })
 }
 
 
