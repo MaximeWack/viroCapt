@@ -15,23 +15,6 @@ parse_sam <- function(rawsam)
 }
 
 
-#' Plot the positions of the reads after alignment
-#'
-#' @param sam sam file object (dataframe)
-#' @return the plot object
-ggplot_reads <- function(sam)
-{
-  sam %>%
-    ggplot2::ggplot() +
-    ggplot2::aes(x = pos) +
-    ggplot2::facet_grid(~genotype) +
-    ggplot2::geom_histogram() +
-    ggplot2::scale_x_continuous(limits = c(0,8000)) +
-    ggplot2::theme_classic() +
-    ggplot2::theme(axis.text.x = ggplot2::element_blank())
-}
-
-
 #' Compute the nucleotide depth
 #'
 #' @export
