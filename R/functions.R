@@ -33,7 +33,8 @@ read_depth <- function(sam)
               tibble::tibble(pos = .) %>%
               dplyr::count(pos) %>%
               tidyr::complete(pos = 1:max(pos), fill = list(n = 0))) %>%
-    tidyr::unnest()
+    tidyr::unnest() %>%
+    dplyr::ungroup()
 }
 
 
@@ -252,7 +253,8 @@ clean_blat <- function(blat)
   dplyr::rename(chr = `T name`, size = `Q size`) %>%
   dplyr::group_by(read, strand, genotype, feature, position, chr, chr_position, size) %>%
   dplyr::summarise(match = max(match)) %>%
-  dplyr::ungroup()
+  dplyr::ungroup() %>%
+  dplyr::distinct()
 }
 
 
@@ -282,7 +284,8 @@ find_concordant_positions <- function(blat)
     dplyr::add_count() %>%
     dplyr::filter(n > 1) %>%
     dplyr::arrange(chr, position, chr_position) %>%
-    dplyr::select(-n)
+    dplyr::select(-n) %>%
+    dplyr::ungroup()
 }
 
 
@@ -296,7 +299,8 @@ filter_two_sides <- function(blat)
     dplyr::semi_join(blat %>%
                      dplyr::group_by(genotype, chr) %>%
                      dplyr::summarise(feat = dplyr::n_distinct(feature)) %>%
-                     dplyr::filter(feat == 2))
+                     dplyr::filter(feat == 2) %>%
+                     dplyr::ungroup())
 }
 
 
@@ -340,5 +344,6 @@ summarise_blat <- function(blat)
     dplyr::group_by(genotype, feature, position, chr, chr_position) %>%
     dplyr::add_count() %>%
     dplyr::summarise(n = max(n), quality = max(quality), match = max(match)) %>%
-    dplyr::arrange(dplyr::desc(quality), dplyr::desc(n), dplyr::desc(match))
+    dplyr::arrange(dplyr::desc(quality), dplyr::desc(n), dplyr::desc(match)) %>%
+    dplyr::ungroup()
 }
