@@ -192,6 +192,23 @@ write_fasta <- function(parsed_sam, fastafile)
 }
 
 
+#' Read a fasta file
+#'
+#' @export
+#' @param fastafile A headerless fasta file to read
+#' @return A fasta file as a dataframe
+read_fasta <- function(fastafile)
+{
+  fastafile %>%
+    readr::read_lines() -> raw
+
+    tibble::tibble(desc = stringr::str_replace(raw[c(T, F)], "^>", ""),
+           nalign_seq = raw[c(F, T)]) %>%
+      tidyr::separate(desc, into = c("read", "genotype", "feature", "feature_pos"), sep = "\\|") %>%
+      dplyr::mutate(feature_pos = feature_pos %>% as.numeric)
+}
+
+
 
 #' Clean a raw blat file
 #'
