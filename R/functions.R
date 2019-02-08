@@ -209,6 +209,17 @@ read_fasta <- function(fastafile)
 }
 
 
+#' Write a blat file
+#'
+#' @export
+#' @param blatobject Blat object (dataframe) to write
+#' @param blatfile Blat file name to write to
+write_blat <- function(blatobject, blatfile)
+{
+  blatobject %>%
+    readr::write_tsv(blatfile)
+}
+
 
 #' Clean a raw blat file
 #'
