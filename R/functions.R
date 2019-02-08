@@ -221,6 +221,19 @@ write_blat <- function(blatobject, blatfile)
 }
 
 
+#' Read a headerless blat file
+#'
+#' @export
+#' @param blatfile The file to read
+#' @return A blatfile organized as a dataframe
+read_blat <- function(blatfile)
+{
+  blatfile %>%
+    readr::read_tsv(col_names = c("match","mis-match","rep.match","N's","Q gap count","Q gap bases","T gap count","T gap bases","strand","Q name","Q size","Q start","Q end","T name","T size","T start","T end","block count","blockSizes","qStarts","tStarts")) %>%
+    tidyr::separate(`Q name`, c("read", "genotype", "feature", "position"), sep = "\\|")
+}
+
+
 #' Clean a raw blat file
 #'
 #' @export
