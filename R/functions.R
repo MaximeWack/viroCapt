@@ -165,23 +165,6 @@ extract_features <- function(parsed_cigar, pos)
 }
 
 
-#' Plot extracted features
-#'
-#' @export
-#' @param features A sam object (dataframe) with parsed CIGARs and extracted features
-plot_features <- function(features)
-{
-  ggplot2::ggplot(features) +
-    ggplot2::geom_vline(ggplot2::aes(xintercept = feature_pos, color = feature, alpha = n)) +
-    ggplot2::scale_alpha_continuous(range = 0:1) +
-    ggplot2::scale_color_manual(values = c("left" = "red", "right" = "blue")) +
-    ggplot2::scale_x_continuous(limits = c(0, 8000)) +
-    ggplot2::facet_grid(~genotype) +
-    ggplot2::theme_classic() +
-    ggplot2::theme(strip.text = ggplot2::element_blank())
-}
-
-
 #' Extract unaligned sequences
 #'
 #' @export
