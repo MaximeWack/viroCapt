@@ -17,7 +17,6 @@ read_sam <- function(filename)
 
 #' Compute the sequencing depth
 #'
-#' @export
 #' @param sam sam file object (dataframe)
 #' @return A sequencing depth object
 read_depth <- function(sam)
@@ -73,7 +72,6 @@ downsample <- function(depth, ratio = 5)
 
 #' Compute moving average
 #'
-#' @export
 #' @param depths A nucleotide depth object
 #' @param window Half-size of the window
 MA <- function(depths, window)
@@ -109,7 +107,6 @@ ggplot_depth <- function(depth)
 
 #' Parse a cigar string into a dataframe with type, length, start and end position
 #'
-#' @export
 #' @param cigar vector of CIGAR string
 #' @return parsed CIGAR as a dataframe
 parse_cigar <- function(cigar)
@@ -141,7 +138,6 @@ parse_cigar <- function(cigar)
 
 #' Extract relevant features from a parsed CIGAR string
 #'
-#' @export
 #' @param parsed_cigar A parsed CIGAR as a dataframe (as returned by parse_cigar)
 #' @param pos The matching position on HPV for that CIGAR string
 #' @return A dataframe of features with their position on HPV
@@ -167,7 +163,6 @@ extract_features <- function(parsed_cigar, pos)
 
 #' Extract unaligned sequences
 #'
-#' @export
 #' @param parsed A sam object (dataframe) with parsed CIGARs and extracted features
 #' @return A sam object with unaligned sequences extracted
 extract_unaligned <- function(parsed)
@@ -236,7 +231,6 @@ read_blat <- function(blatfile)
 
 #' Clean a raw blat file
 #'
-#' @export
 #' @param blat A blat object (dataframe obtained from Gread_blat)
 #' @return A cleaned, deduplicated blat object
 clean_blat <- function(blat)
@@ -306,7 +300,6 @@ filter_two_sides <- function(blat)
 
 #' Tag a blat object with quality measures
 #'
-#' @export
 #' @param blat A blat object (dataframe)
 #' @param fasta The corresponding fasta file that produced the blat object
 #' @return An tagged blat file enriched with the source sequence
@@ -333,9 +326,9 @@ tag_blat <- function(blat, fasta)
     dplyr::select(read, strand, sequence = nalign_seq, genotype, feature, position, chr, chr_position, match, quality)
 }
 
+
 #' Summarise the results of a tagged blat file
 #'
-#' @export
 #' @param blat A tagged blat file
 #' @return A summary table of results
 summarise_blat <- function(blat)
