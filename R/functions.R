@@ -334,6 +334,7 @@ tag_blat <- function(blat, fasta)
 summarise_blat <- function(blat)
 {
   blat %>%
+    dplyr::mutate(quality = quality %>% ordered(levels = c("T", "C", "H", "HT", "CT", "HC", "HCT"))) %>%
     dplyr::group_by(genotype, feature, position, chr, chr_position) %>%
     dplyr::add_count() %>%
     dplyr::summarise(n = max(n), quality = max(quality), match = max(match)) %>%
