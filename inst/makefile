@@ -12,6 +12,8 @@ BT_OPTIONS_LOCAL=--local --no-unal --very-sensitive-local
 BLAT_OPTIONS=-minScore=25 -minIdentity=90 -noHead
 
 LOCAL_PLOT_LIMIT=5
+FINAL_PLOT_LIMIT=1
+
 red="\033[0;31m"
 end="\033[0m"
 
@@ -22,7 +24,10 @@ fastqs=$(shell \
 	| sort \
 	| uniq)
 
-All: QC Local_plot Summarise_blat
+All: QC Local_plot Final_plot
+
+# Plot the final Plots
+Final_plot: $(patsubst %, $(DATADIR)/$(BLATDIR)/%.png, $(fastqs))
 
 # Summarise the cleaned blat file
 Summarise_blat: $(patsubst %, $(DATADIR)/$(BLATDIR)/%_summary.tsv, $(fastqs))
@@ -56,6 +61,11 @@ QC: $(patsubst %, $(DATADIR)/$(QCDIR)/%.png, $(fastqs))
 
 # QC_sam
 # QC_sam: $(patsubst %, $(DATADIR)/$(QCDIR)/%.sam, $(fastqs))
+
+# Plot a final plot
+$(DATADIR)/$(BLATDIR)/%.png: $(DATADIR)/$(BLATDIR)/%_summary.tsv $(DATADIR)/$(LOCALDIR)/%.png
+	@echo -e $(red) "Plotting the final plot for $*" $(end)
+	Rscript -e 'HPVcap::plot_final("$(DATADIR)/$(LOCALDIR)/$*", "$(DATADIR)/$(BLATDIR)/$*", limit = $(FINAL_PLOT_LIMIT))'
 
 # Summarise a cleaned blat file
 $(DATADIR)/$(BLATDIR)/%_summary.tsv: $(DATADIR)/$(BLATDIR)/%_cleaned.tsv

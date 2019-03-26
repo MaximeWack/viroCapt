@@ -353,3 +353,47 @@ summarise_blat <- function(blat)
     dplyr::arrange(dplyr::desc(quality), dplyr::desc(n), dplyr::desc(match)) %>%
     dplyr::ungroup()
 }
+
+
+#' Read a blat summary file
+#'
+#' @param summ_blat Name of the summary file
+#' @return A blat summary object
+read_summary <- function(summ_blat)
+{
+  readr::read_tsv(summ_blat) %>%
+    dplyr::mutate(quality = quality %>% ordered(levels = c("T", "C", "H", "HT", "CT", "HC", "HCT")))
+}
+
+
+#' Plot the final plot with insertions
+#'
+#' @param depth A sequencing depth object
+#' @param summ_blat A blat summary object
+#' @return A nucleotide depth plot
+ggplot_final <- function(depth, summ_blat)
+{
+  depth %>%
+    ggplot2::ggplot() +
+    ggplot2::aes(x = pos, y = n) +
+    ggplot2::geom_area() +
+    ggplot2::facet_grid(~genotype) +
+    ggplot2::theme(strip.text = ggplot2::element_text(angle = -90)) -> local_plot
+
+    summ_blat %>% dplyr::filter(!is.na(quality), quality >= "HC") -> summ_blat
+
+    max(depth$n) -> max_n
+
+    local_plot +
+      ggplot2::geom_vline(data = summ_blat, ggplot2::aes(xintercept = position, color = chr, alpha = quality)) -> p
+
+    if (summ_blat %>% dplyr::filter(feature == "left") %>% nrow > 0)
+      p + ggplot2::geom_segment(data = summ_blat %>% dplyr::filter(feature == "left"), ggplot2::aes(x = position, xend = position - 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+
+    if (summ_blat %>% dplyr::filter(feature == "right") %>% nrow > 0)
+      p + ggplot2::geom_segment(data = summ_blat %>% dplyr::filter(feature == "right"), ggplot2::aes(x = position, xend = position + 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+
+    p +
+      ggplot2::scale_alpha_ordinal(limits = c("HC", "HCT"), range = c(0.5, 1)) +
+      ggplot2::theme_classic()
+}

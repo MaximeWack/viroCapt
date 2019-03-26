@@ -20,6 +20,31 @@ plot_depth <- function(stem, limit = 5)
     ggplot2::ggsave(Plot)
 }
 
+
+#' Plot the final plot
+#'
+#' @export
+#' @param sam Stem name of the sam file
+#' @param summ Stem name of the blat summary file
+#' @param limit Limit the number of genotypes to display
+plot_final <- function(sam, summ, limit = 1)
+{
+  stringr::str_c(summ, "_summary.tsv") %>%
+    read_summary -> summ_blat
+
+  stringr::str_c(sam, ".sam") %>%
+    read_sam %>%
+    limit_genotypes(limit) %>%
+    dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
+    tidyr::unnest() %>%
+    read_depth %>%
+    # normalise_depth(qc_norm) %>%
+    downsample %>%
+    # MA(15) %>%
+    ggplot_final(summ_blat) -> Plot
+
+  stringr::str_c(summ, ".png") %>%
+    ggplot2::ggsave(Plot)
 }
 
 
