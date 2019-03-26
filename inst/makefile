@@ -48,13 +48,13 @@ Selection: $(patsubst %, $(DATADIR)/$(GLOBALDIR)/%.tsv.sel, $(fastqs))
 Genotyping: $(patsubst %, $(DATADIR)/$(GLOBALDIR)/%.tsv, $(fastqs))
 
 # Global alignement
-Global: $(patsubst %, $(DATADIR)/$(GLOBALDIR)/%.sam, $(fastqs))
+# Global: $(patsubst %, $(DATADIR)/$(GLOBALDIR)/%.sam, $(fastqs))
 
 # QC
 QC: $(patsubst %, $(DATADIR)/$(QCDIR)/%.png, $(fastqs))
 
 # QC_sam
-QC_sam: $(patsubst %, $(DATADIR)/$(QCDIR)/%.sam, $(fastqs))
+# QC_sam: $(patsubst %, $(DATADIR)/$(QCDIR)/%.sam, $(fastqs))
 
 # Summarise a cleaned blat file
 $(DATADIR)/$(BLATDIR)/%_summary.tsv: $(DATADIR)/$(BLATDIR)/%_cleaned.tsv
@@ -79,7 +79,7 @@ $(DATADIR)/$(FASTADIR)/%.fa: $(DATADIR)/$(LOCALDIR)/%.sam | $(DATADIR)/$(FASTADI
 # Local alignment plot
 $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.sam
 	@echo -e $(red) "Plotting local alignment for $*" $(end)
-	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(LOCALDIR)/$*", T)'
+	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(LOCALDIR)/$*")'
 
 ## Local alignment pairend
 $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq $(DATADIR)/%.R2.fastq | $(DATADIR)/$(LOCALDIR) Refs
