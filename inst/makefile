@@ -11,6 +11,7 @@ BT_OPTIONS_GLOBAL=--no-unal --very-sensitive
 BT_OPTIONS_LOCAL=--local --no-unal --very-sensitive-local
 BLAT_OPTIONS=-minScore=25 -minIdentity=90 -noHead
 
+LOCAL_PLOT_LIMIT=5
 red="\033[0;31m"
 end="\033[0m"
 
@@ -79,7 +80,7 @@ $(DATADIR)/$(FASTADIR)/%.fa: $(DATADIR)/$(LOCALDIR)/%.sam | $(DATADIR)/$(FASTADI
 # Local alignment plot
 $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.sam
 	@echo -e $(red) "Plotting local alignment for $*" $(end)
-	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(LOCALDIR)/$*")'
+	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(LOCALDIR)/$*", limit = $(LOCAL_PLOT_LIMIT))'
 
 ## Local alignment pairend
 $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq $(DATADIR)/%.R2.fastq | $(DATADIR)/$(LOCALDIR) Refs

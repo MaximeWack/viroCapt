@@ -2,11 +2,12 @@
 #'
 #' @export
 #' @param stem Stem name for sam file and plot file
-#' @param Save Whether to save the data of the plot as an rds file
-plot_depth <- function(stem, Save = F)
+#' @param limit Limit the number of genotypes to display
+plot_depth <- function(stem, limit = 5)
 {
   stringr::str_c(stem, ".sam") %>%
     read_sam %>%
+    limit_genotypes(limit) %>%
     dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
     tidyr::unnest() %>%
     read_depth %>%
@@ -17,9 +18,8 @@ plot_depth <- function(stem, Save = F)
 
   stringr::str_c(stem, ".png") %>%
     ggplot2::ggsave(Plot)
+}
 
-    if (Save)
-      saveRDS(Plot, stringr::str_c(stem, ".rds"))
 }
 
 

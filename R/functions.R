@@ -90,6 +90,18 @@ MA <- function(depths, window)
 }
 
 
+#' Limit the number of genotypes in a sample
+#'
+#' @param depths A nucleotide depth object
+#' @param limit The number of genotypes to keep
+limit_genotypes <- function(depths, limit)
+{
+  depths %>%
+    dplyr::filter(genotype %in% base::levels(genotype)[1:limit]) %>%
+    dplyr::mutate(genotype = genotype %>% forcats::fct_drop())
+}
+
+
 #' Plot the nucleotide depth
 #'
 #' @param depth A sequencing depth object
