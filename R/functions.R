@@ -1,6 +1,5 @@
 #' Read a headerless sam file
 #'
-#' @export
 #' @param filename The SAM filename
 #' @return A dataframe with columns (read, genotype, pos, cigar, seq)
 read_sam <- function(filename)
@@ -74,6 +73,7 @@ downsample <- function(depth, ratio = 5)
 #'
 #' @param depths A nucleotide depth object
 #' @param window Half-size of the window
+#' @return A smoothed depth object
 MA <- function(depths, window)
 {
   depths %>%
@@ -94,6 +94,7 @@ MA <- function(depths, window)
 #'
 #' @param depths A nucleotide depth object
 #' @param limit The number of genotypes to keep
+#' @return A depth object with only the top n genotypes
 limit_genotypes <- function(depths, limit)
 {
   depths %>%
