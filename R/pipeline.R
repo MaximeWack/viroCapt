@@ -6,18 +6,26 @@
 plot_depth <- function(stem, limit = 5)
 {
   stringr::str_c(stem, ".sam") %>%
-    read_sam %>%
-    limit_genotypes(limit) %>%
-    dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
-    tidyr::unnest() %>%
-    read_depth %>%
-    # normalise_depth(qc_norm) %>%
-    downsample %>%
-    # MA(15) %>%
-    ggplot_depth -> Plot
+    read_sam -> sam
 
-  stringr::str_c(stem, ".png") %>%
-    ggplot2::ggsave(Plot)
+  if (length(sam) > 0)
+  {
+    sam %>%
+      limit_genotypes(limit) %>%
+      dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
+      tidyr::unnest() %>%
+      read_depth %>%
+      # normalise_depth(qc_norm) %>%
+      downsample %>%
+      # MA(15) %>%
+      ggplot_depth -> Plot
+
+    stringr::str_c(stem, ".png") %>%
+      ggplot2::ggsave(Plot)
+  } else
+  {
+    cat(NULL, file = stringr::str_c(stem, ".png"))
+  }
 }
 
 
@@ -33,18 +41,31 @@ plot_final <- function(sam, summ, limit = 1)
     read_summary -> summ_blat
 
   stringr::str_c(sam, ".sam") %>%
-    read_sam %>%
-    limit_genotypes(limit) %>%
-    dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
-    tidyr::unnest() %>%
-    read_depth %>%
-    # normalise_depth(qc_norm) %>%
-    downsample %>%
-    # MA(15) %>%
-    ggplot_final(summ_blat) -> Plot
+    read_sam -> sam
 
-  stringr::str_c(summ, ".png") %>%
-    ggplot2::ggsave(Plot)
+  if (length(sam) > 0 & length(summ_blat) > 0)
+  {
+    sam %>%
+      limit_genotypes(limit) -> sam
+
+    summ_blat %>%
+      dplyr::semi_join(sam, by = "genotype") -> summ_blat
+
+    sam %>%
+      dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
+      tidyr::unnest() %>%
+      read_depth %>%
+      # normalise_depth(qc_norm) %>%
+      downsample %>%
+      # MA(15) %>%
+      ggplot_final(summ_blat) -> Plot
+
+    stringr::str_c(summ, ".png") %>%
+      ggplot2::ggsave(Plot)
+  } else
+  {
+    cat(NULL, file = stringr::str_c(summ, ".png"))
+  }
 }
 
 
@@ -56,15 +77,23 @@ plot_final <- function(sam, summ, limit = 1)
 extract_fasta <- function(samfile, fastafile)
 {
   samfile %>%
-    read_sam %>%
-    dplyr::filter(cigar %>% stringr::str_detect("S")) %>%
-    dplyr::mutate(parsed = cigar %>% parse_cigar,
-                  parsed = purrr::map2(parsed, pos, extract_features)) %>%
-    tidyr::unnest() %>%
-    dplyr::filter(length_read > 25,
-           feature %in% c("left", "right")) %>%
-    extract_unaligned %>%
-    write_fasta(fastafile)
+    read_sam -> sam
+
+  if (length(sam) > 0)
+  {
+    sam %>%
+      dplyr::filter(cigar %>% stringr::str_detect("S")) %>%
+      dplyr::mutate(parsed = cigar %>% parse_cigar,
+                    parsed = purrr::map2(parsed, pos, extract_features)) %>%
+      tidyr::unnest() %>%
+      dplyr::filter(length_read > 25,
+                    feature %in% c("left", "right")) %>%
+      extract_unaligned %>%
+      write_fasta(fastafile)
+  } else
+  {
+    cat(NULL, file = fastafile)
+  }
 }
 
 
@@ -80,10 +109,18 @@ cleaned_blat <- function(blatfile, fastafile, cleaned)
     read_fasta -> fasta
 
   blatfile %>%
-    read_blat %>%
-    clean_blat %>%
-    tag_blat(fasta) %>%
-    write_blat(cleaned)
+    read_blat -> blat
+
+  if (length(blat) > 0)
+  {
+    blat %>%
+      clean_blat %>%
+      tag_blat(fasta) %>%
+      write_blat(cleaned)
+  } else
+  {
+    cat(NULL, file = cleaned)
+  }
 }
 
 
@@ -95,7 +132,15 @@ cleaned_blat <- function(blatfile, fastafile, cleaned)
 summarised_blat <- function(blatfile, summarised)
 {
   blatfile %>%
-    readr::read_tsv() %>%
-    summarise_blat %>%
-    write_blat(summarised)
+    readr::read_tsv() -> blat
+
+  if (length(blat) > 0)
+  {
+    blat %>%
+      summarise_blat %>%
+      write_blat(summarised)
+  } else
+  {
+    cat(NULL, file = summarised)
+  }
 }

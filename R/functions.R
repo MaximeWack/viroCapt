@@ -7,9 +7,12 @@ read_sam <- function(filename)
   suppressWarnings({
   readr::read_tsv(filename,
            col_names = c("read", "flag", "genotype", "pos", "mapq", "cigar", "rnext", "pnext", "tlen", "seq"),
-           col_types = "ciciicciic") %>%
-  dplyr::select(read, genotype, pos, cigar, seq) %>%
-  dplyr::mutate(genotype = forcats::fct_infreq(genotype))
+           col_types = "ciciicciic") -> sam
+
+  if (length(sam) > 0)
+    sam %>%
+      dplyr::select(read, genotype, pos, cigar, seq) %>%
+      dplyr::mutate(genotype = forcats::fct_infreq(genotype))
   })
 }
 
@@ -237,8 +240,11 @@ write_blat <- function(blatobject, blatfile)
 read_blat <- function(blatfile)
 {
   blatfile %>%
-    readr::read_tsv(col_names = c("match","mis-match","rep.match","N's","Q gap count","Q gap bases","T gap count","T gap bases","strand","Q name","Q size","Q start","Q end","T name","T size","T start","T end","block count","blockSizes","qStarts","tStarts")) %>%
-    tidyr::separate(`Q name`, c("read", "genotype", "feature", "position"), sep = "\\|")
+    readr::read_tsv(col_names = c("match","mis-match","rep.match","N's","Q gap count","Q gap bases","T gap count","T gap bases","strand","Q name","Q size","Q start","Q end","T name","T size","T start","T end","block count","blockSizes","qStarts","tStarts")) -> blat
+
+  if (length(blat) > 0)
+    blat %>%
+      tidyr::separate(`Q name`, c("read", "genotype", "feature", "position"), sep = "\\|")
 }
 
 
@@ -362,8 +368,11 @@ summarise_blat <- function(blat)
 #' @return A blat summary object
 read_summary <- function(summ_blat)
 {
-  readr::read_tsv(summ_blat) %>%
-    dplyr::mutate(quality = quality %>% ordered(levels = c("T", "C", "H", "HT", "CT", "HC", "HCT")))
+  readr::read_tsv(summ_blat) -> blat
+
+  if (length(blat) > 0)
+    blat %>%
+      dplyr::mutate(quality = quality %>% ordered(levels = c("T", "C", "H", "HT", "CT", "HC", "HCT")))
 }
 
 
