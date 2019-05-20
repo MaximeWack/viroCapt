@@ -266,6 +266,7 @@ clean_blat <- function(blat)
   dplyr::rename(chr = `T name`, size = `Q size`) %>%
   dplyr::group_by(read, strand, genotype, feature, position, chr, chr_position, size) %>%
   dplyr::summarise(match = max(match)) %>%
+  dplyr::filter(size == max(size)) %>%
   dplyr::ungroup() %>%
   dplyr::distinct()
 }
