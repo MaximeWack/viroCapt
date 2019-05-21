@@ -198,7 +198,14 @@ extract_unaligned <- function(parsed)
 #' @param fastafile A file to write to
 write_fasta <- function(parsed_sam, fastafile)
 {
-  paste(paste0(">", parsed_sam$read, "|", parsed_sam$genotype, "|", parsed_sam$feature, "|", parsed_sam$feature_pos), parsed_sam$nalign_seq, sep = "\n", collapse = "\n") %>%
+  paste(paste0(">",
+               parsed_sam$read, "|",
+               parsed_sam$genotype, "|",
+               parsed_sam$feature, "|",
+               parsed_sam$feature_pos),
+        parsed_sam$nalign_seq,
+        sep = "\n",
+        collapse = "\n") %>%
     cat(file = fastafile)
 }
 
@@ -222,14 +229,10 @@ read_fasta <- function(fastafile)
 
 #' Write a blat file
 #'
+#' Copy of readr::write_tsv
+#'
 #' @export
-#' @param blatobject Blat object (dataframe) to write
-#' @param blatfile Blat file name to write to
-write_blat <- function(blatobject, blatfile)
-{
-  blatobject %>%
-    readr::write_tsv(blatfile)
-}
+write_blat <- readr::write_tsv
 
 
 #' Read a headerless blat file
