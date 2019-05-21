@@ -33,7 +33,7 @@ read_depth <- function(sam)
               unlist %>%
               tibble::tibble(pos = .) %>%
               dplyr::count(pos) %>%
-              tidyr::complete(pos = 1:max(pos), fill = list(n = 0))) %>%
+              tidyr::complete(pos = 1:max(pos, na.rm = T), fill = list(n = 0))) %>%
     tidyr::unnest() %>%
     dplyr::ungroup()
 }
@@ -67,7 +67,7 @@ downsample <- function(depth, ratio = 5)
   depth %>%
     dplyr::mutate(pos = ( (pos / ratio) %>% ceiling) * ratio) %>%
     dplyr::group_by(genotype, pos) %>%
-    dplyr::summarise(n = mean(n)) %>%
+    dplyr::summarise(n = mean(n, na.rm = T)) %>%
     dplyr::ungroup()
 }
 
@@ -85,8 +85,8 @@ MA <- function(depths, window)
     lapply(function(x)
            {
              x %>%
-               dplyr::mutate(roll = pos %>% purrr::map_dbl(~mean(x$n[x$pos %in% seq(. - window, . + window)]))) %>%
-               tidyr::complete(pos = 1:max(pos), fill = list(genotype = x$genotype %>% unique,roll = 0, n = 0))
+               dplyr::mutate(roll = pos %>% purrr::map_dbl(~mean(x$n[x$pos %in% seq(. - window, . + window)], na.rm = T))) %>%
+               tidyr::complete(pos = 1:max(pos, na.rm = T), fill = list(genotype = x$genotype %>% unique, roll = 0, n = 0))
            }) %>%
     dplyr::bind_rows() %>%
     dplyr::mutate(n = roll)
@@ -265,8 +265,8 @@ clean_blat <- function(blat)
                 prop > .9) %>%
   dplyr::rename(chr = `T name`, size = `Q size`) %>%
   dplyr::group_by(read, strand, genotype, feature, position, chr, chr_position, size) %>%
-  dplyr::summarise(match = max(match)) %>%
-  dplyr::filter(size == max(size)) %>%
+  dplyr::summarise(match = max(match, na.rm = T)) %>%
+  dplyr::filter(size == max(size, na.rm = T)) %>%
   dplyr::ungroup() %>%
   dplyr::distinct()
 }
@@ -336,7 +336,7 @@ tag_blat <- function(blat, fasta)
     dplyr::bind_rows() %>%
     dplyr::mutate(quality = quality %>% ordered(levels = c("T", "C", "H", "HT", "CT", "HC", "HCT"))) %>%
     dplyr::group_by(read, feature) %>%
-    dplyr::filter(quality == max(quality)) %>%
+    dplyr::filter(quality == max(quality, na.rm = T)) %>%
     dplyr::ungroup() %>%
     dplyr::full_join(blat) %>%
     dplyr::mutate(position = position %>% as.numeric) %>%
@@ -357,7 +357,7 @@ summarise_blat <- function(blat)
     dplyr::mutate(quality = quality %>% ordered(levels = c("T", "C", "H", "HT", "CT", "HC", "HCT"))) %>%
     dplyr::group_by(genotype, feature, position, chr, chr_position) %>%
     dplyr::add_count() %>%
-    dplyr::summarise(n = max(n), quality = max(quality), match = max(match)) %>%
+    dplyr::summarise(n = max(n, na.rm = T), quality = max(quality, na.rm = T), match = max(match, na.rm = T)) %>%
     dplyr::arrange(dplyr::desc(quality), dplyr::desc(n), dplyr::desc(match)) %>%
     dplyr::ungroup()
 }
