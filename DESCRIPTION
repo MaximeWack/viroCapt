@@ -1,8 +1,8 @@
 Package: HPVcap
-Title: Functions for HPV capture analysis pipeline
+Title: HPV capture analysis pipeline
 Version: 0.0.0.9000
 Authors@R: person("Maxime", "Wack", email = "maximewack@free.fr", role = c("aut", "cre"))
-Description: Provides wrappers around bioinformatics tools, and plotting functions, and specific functions for HPV capture analysis.
+Description: Provides wrappers around bioinformatics tools, plotting functions, and functions for HPV capture analysis.
 Depends: R (>= 3.4.4)
 License: GPL-3 + file LICENSE
 LazyData: true
