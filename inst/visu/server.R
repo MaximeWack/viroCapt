@@ -76,3 +76,5 @@ server <- function(input, output, session)
     HPVcap:::ggplot_depth(depths())
   })
 }
+
+shinyApp(ui, server)
