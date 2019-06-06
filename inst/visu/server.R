@@ -29,4 +29,12 @@ server <- function(input, output, session)
         HPVcap:::downsample()
     })
   })
+
+  # Read blat summary
+  summ_blat <- reactive({
+    req(input$summ)
+
+    input$summ$datapath %>%
+      HPVcap:::read_summary()
+  })
 }
