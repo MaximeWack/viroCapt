@@ -64,4 +64,15 @@ server <- function(input, output, session)
   observe(updateSelectizeInput(session, "chrs", choices = summ_blat()$chr %>% UIlabels))
   observe(updateSliderInput(session, "nreads", min = summ_blat()$n %>% min, max = summ_blat()$n %>% max))
   observe(updateSliderInput(session, "match", min = summ_blat()$match %>% min, max = summ_blat()$match %>% max))
+
+  depths <- reactive({
+    req(input$genotype)
+
+    sam() %>%
+      filter(genotype %in% input$genotype)
+  })
+
+  output$plot <- renderPlot({
+    HPVcap:::ggplot_depth(depths())
+  })
 }
