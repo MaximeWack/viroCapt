@@ -2,6 +2,8 @@ library(tidyverse)
 library(HPVcap)
 library(shiny)
 
+options(shiny.maxRequestSize = 1024 ^ 3)
+
 server <- function(input, output, session)
 {
   # Read and parse the sam file
