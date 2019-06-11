@@ -19,7 +19,7 @@ ui <- bootstrapPage(
                                     "Chromosomes",
                                     "",
                                     multiple = T),
-                     sliderInput("nreads", "Nombre de reads minimum", 0, 0, 0),
-                     sliderInput("match", "Score minimal de matching", 0, 0, 0))),
+                     sliderInput("nreads", "Nombre de reads minimum", 0, 0, 0, step = 1, round = T),
+                     sliderInput("match", "Score minimal de matching", 0, 0, 0, step = 1, round = T))),
         mainPanel(plotOutput("plot"),
                   DT::dataTableOutput("table")))
