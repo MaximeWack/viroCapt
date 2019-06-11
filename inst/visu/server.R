@@ -55,12 +55,15 @@ server <- function(input, output, session)
       setNames(str_c(genotypes$genotype, " (", genotypes$n, ")")) -> genotypes
 
     updateSelectizeInput(session, "genotype", choices = genotypes, selected = genotypes[1])
+
   })
 
-  observe(updateSelectizeInput(session, "scores", choices = summ_blat()$quality %>% UIlabels))
-  observe(updateSelectizeInput(session, "chrs", choices = summ_blat()$chr %>% UIlabels))
-  observe(updateSliderInput(session, "nreads", min = summ_blat()$n %>% min, max = summ_blat()$n %>% max))
-  observe(updateSliderInput(session, "match", min = summ_blat()$match %>% min, max = summ_blat()$match %>% max))
+  observe({
+    updateSelectizeInput(session, "scores", choices = summ_blat_file()$quality %>% UIlabels)
+    updateSelectizeInput(session, "chrs", choices = summ_blat_file()$chr %>% UIlabels)
+    updateSliderInput(session, "nreads", min = summ_blat_file()$n %>% min, max = summ_blat_file()$n %>% max)
+    updateSliderInput(session, "match", min = summ_blat_file()$match %>% min, max = summ_blat_file()$match %>% max)
+  })
 
   depths <- reactive({
     req(input$genotype)
