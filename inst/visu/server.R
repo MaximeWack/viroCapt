@@ -37,7 +37,7 @@ server <- function(input, output, session)
   })
 
   # Read blat summary
-  summ_blat <- reactive({
+  summ_blat_file <- reactive({
     req(input$summ)
 
     input$summ$datapath %>%
@@ -72,8 +72,25 @@ server <- function(input, output, session)
       filter(genotype %in% input$genotype)
   })
 
+  summ_blat <- reactive({
+    summ_blat_file() %>%
+      filter(genotype %in% input$genotype,
+             n >= input$nreads,
+             match >= input$match) -> summ
+
+    if (! input$chrs %>% is.null)
+      summ %>% filter(chr %in% input$chrs) -> summ
+
+    if (! input$scores %>% is.null)
+      summ %>% filter(quality %in% input$scores) -> summ
+
+    summ
+  })
+
   output$plot <- renderPlot({
     HPVcap:::ggplot_depth(depths())
+  })
+
   })
 }
 
