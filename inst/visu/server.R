@@ -1,6 +1,7 @@
 library(tidyverse)
 library(HPVcap)
 library(shiny)
+library(plotly)
 
 options(shiny.maxRequestSize = 1024 ^ 3)
 
@@ -93,10 +94,25 @@ server <- function(input, output, session)
     summ
   })
 
-  output$plot <- renderPlot({
+  localplot <- reactive({
     HPVcap:::ggplot_depth(depths())
   })
 
+  output$plot <- renderPlotly({
+    max(depths()$n) -> max_n
+
+    localplot() +
+      geom_vline(data = summ_blat(), aes(xintercept = position, color = chr, alpha = quality)) -> p
+
+    if (summ_blat() %>% filter(feature == "left") %>% nrow > 0)
+      p + geom_segment(data = summ_blat() %>% filter(feature == "left"), aes(x = position, xend = position - 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+
+    if (summ_blat() %>% filter(feature == "right") %>% nrow > 0)
+      p + geom_segment(data = summ_blat() %>% filter(feature == "right"), aes(x = position, xend = position + 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+
+    p +
+      scale_alpha_ordinal(range = c(0.5, 1)) +
+      theme_classic()
   })
 }
 
