@@ -32,11 +32,7 @@ server <- function(input, output, session)
 
       incProgress(message = "Computing nucleotide read depth")
       sam %>%
-        HPVcap:::read_depth() -> sam
-
-      incProgress(message = "Downsampling for displaying")
-      sam %>%
-        HPVcap:::downsample()
+        HPVcap:::read_depth()
     })
   })
 
@@ -52,12 +48,13 @@ server <- function(input, output, session)
   observe({
     sam() %>%
       group_by(genotype) %>%
-      summarise(n = max(n)) -> genotypes
+      summarise(n = max(n)) %>%
+      mutate(genotype = genotype %>% as.character) -> genotypes
 
     genotypes$genotype %>%
       setNames(str_c(genotypes$genotype, " (", genotypes$n, ")")) -> genotypes
 
-    updateSelectizeInput(session, "genotype", choices = genotypes) #, selected = genotypes[1])
+    updateSelectizeInput(session, "genotype", choices = genotypes, selected = genotypes[1])
   })
 
   observe(updateSelectizeInput(session, "scores", choices = summ_blat()$quality %>% UIlabels))
