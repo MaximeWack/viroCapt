@@ -41,7 +41,8 @@ server <- function(input, output, session)
     req(input$summ)
 
     input$summ$datapath %>%
-      HPVcap:::read_summary()
+      HPVcap:::read_summary() %>%
+      mutate(quality = quality %>% fct_drop)
   })
 
   # Set UI values
