@@ -66,10 +66,15 @@ server <- function(input, output, session)
     updateSliderInput(session, "match", min = summ_blat_file()$match %>% min, max = summ_blat_file()$match %>% max)
   })
 
+  downsampled_depths <- reactive({
+    sam() %>%
+      HPVcap:::downsample(10)
+  })
+
   depths <- reactive({
     req(input$genotype)
 
-    sam() %>%
+    downsampled_depths() %>%
       filter(genotype %in% input$genotype)
   })
 
