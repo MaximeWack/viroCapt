@@ -114,6 +114,8 @@ server <- function(input, output, session)
       scale_alpha_ordinal(range = c(0.5, 1)) +
       theme_classic()
   })
+
+  output$table <- DT::renderDataTable(summ_blat())
 }
 
 shinyApp(ui, server)
