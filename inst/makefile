@@ -18,8 +18,8 @@ red="\033[0;31m"
 end="\033[0m"
 
 fastqs=$(shell \
-	find $(DATADIR) -type f -name '*.fastq' \
-	| sed -r 's%\.(R[[:digit:]]|U)\.fastq%%' \
+	find $(DATADIR) -type f -name '*.fastq*' \
+	| sed -r 's%\.(R[[:digit:]]|U)\.fastq.*%%' \
 	| sed -r 's%$(DATADIR)\/%%' \
 	| sort \
 	| uniq)
@@ -92,6 +92,16 @@ $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.sam
 	@echo -e $(red) "Plotting local alignment for $*" $(end)
 	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(LOCALDIR)/$*", limit = $(LOCAL_PLOT_LIMIT))'
 
+## Local alignment pairend gzipped
+$(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(LOCALDIR) Refs
+	for genotype in `cat $(DATADIR)/$(GLOBALDIR)/$*.tsv.sel`; do \
+		echo -e $(red) "Local alignment on $$genotype for $*" $(end) ; \
+		bowtie2 -x refs/$$genotype -1 $(DATADIR)/$*.R1.fastq.gz -2 $(DATADIR)/$*.R2.fastq.gz $(BT_OPTIONS_LOCAL) -p $(THREADS) \
+			| samtools sort -@ $(THREADS) -O sam - \
+			| samtools rmdup - - --output-fmt sam \
+			| samtools view >> $@ ; \
+	done
+
 ## Local alignment pairend
 $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq $(DATADIR)/%.R2.fastq | $(DATADIR)/$(LOCALDIR) Refs
 	for genotype in `cat $(DATADIR)/$(GLOBALDIR)/$*.tsv.sel`; do \
@@ -99,6 +109,15 @@ $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.
 		bowtie2 -x refs/$$genotype -1 $(DATADIR)/$*.R1.fastq -2 $(DATADIR)/$*.R2.fastq $(BT_OPTIONS_LOCAL) -p $(THREADS) \
 			| samtools sort -@ $(THREADS) -O sam - \
 			| samtools rmdup - - --output-fmt sam \
+			| samtools view >> $@ ; \
+	done
+
+## Local alignment single gzipped
+$(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.U.fastq.gz | $(DATADIR)/$(LOCALDIR) Refs
+	for genotype in `cat $(DATADIR)/$(GLOBALDIR)/$*.tsv.sel`; do \
+		echo -e $(red) "Local alignment on $$genotype for $*" $(end) ; \
+		bowtie2 -x refs/$$genotype -U $(DATADIR)/$*.U.fastq.gz $(BT_OPTIONS_LOCAL) -p $(THREADS) \
+			| samtools sort -@ $(THREADS) -O sam - \
 			| samtools view >> $@ ; \
 	done
 
@@ -134,10 +153,24 @@ $(DATADIR)/$(GLOBALDIR)/%.tsv: $(DATADIR)/$(GLOBALDIR)/%.sam
 
 ## Global alignment
 
+# Global alignment pairend gzipped
+$(DATADIR)/$(GLOBALDIR)/%.sam: $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(GLOBALDIR) Refs
+	@echo -e $(red) "Running pair-end global alignment for $*" $(end)
+	bowtie2 -x refs/HPVs -1 $(DATADIR)/$*.R1.fastq.gz -2 $(DATADIR)/$*.R2.fastq.gz $(BT_OPTIONS_GLOBAL) -p $(THREADS) \
+		| samtools sort -@ $(THREADS) -O sam - \
+		| samtools view > $@
+
 # Global alignment pairend
 $(DATADIR)/$(GLOBALDIR)/%.sam: $(DATADIR)/%.R1.fastq $(DATADIR)/%.R2.fastq | $(DATADIR)/$(GLOBALDIR) Refs
 	@echo -e $(red) "Running pair-end global alignment for $*" $(end)
 	bowtie2 -x refs/HPVs -1 $(DATADIR)/$*.R1.fastq -2 $(DATADIR)/$*.R2.fastq $(BT_OPTIONS_GLOBAL) -p $(THREADS) \
+		| samtools sort -@ $(THREADS) -O sam - \
+		| samtools view > $@
+
+# Global alignment single gzipped
+$(DATADIR)/$(GLOBALDIR)/%.sam: $(DATADIR)/%.U.fastq.gz | $(DATADIR)/$(GLOBALDIR) Refs
+	@echo -e $(red) "Running single read global alignment for $*" $(end)
+	bowtie2 -x refs/HPVs -U $(DATADIR)/$*.U.fastq.gz $(BT_OPTIONS_GLOBAL) -p $(THREADS) \
 		| samtools sort -@ $(THREADS) -O sam - \
 		| samtools view > $@
 
@@ -155,10 +188,24 @@ $(DATADIR)/$(QCDIR)/%.png: $(DATADIR)/$(QCDIR)/%.sam
 	@echo -e $(red) "Plotting quality control for $*" $(end)
 	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(QCDIR)/$*")'
 
+# Quality control pairend gzipped
+$(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(QCDIR) Refs
+	@echo -e $(red) "Running pair-end quality control for $*" $(end)
+	bowtie2 -x refs/ctrl_capture -1 $(DATADIR)/$*.R1.fastq.gz -2 $(DATADIR)/$*.R2.fastq.gz $(BT_OPTIONS_GLOBAL) -p $(THREADS) \
+		| samtools sort -@ $(THREADS) -O sam - \
+		| samtools view > $@
+
 # Quality control pairend
 $(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.R1.fastq $(DATADIR)/%.R2.fastq | $(DATADIR)/$(QCDIR) Refs
 	@echo -e $(red) "Running pair-end quality control for $*" $(end)
 	bowtie2 -x refs/ctrl_capture -1 $(DATADIR)/$*.R1.fastq -2 $(DATADIR)/$*.R2.fastq $(BT_OPTIONS_GLOBAL) -p $(THREADS) \
+		| samtools sort -@ $(THREADS) -O sam - \
+		| samtools view > $@
+
+# Quality control single gzipped
+$(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.U.fastq.gz | $(DATADIR)/$(QCDIR) Refs
+	@echo -e $(red) "Running single read quality control for $*" $(end)
+	bowtie2 -x refs/ctrl_capture -U $(DATADIR)/$*.U.fastq.gz $(BT_OPTIONS_GLOBAL) -p $(THREADS) \
 		| samtools sort -@ $(THREADS) -O sam - \
 		| samtools view > $@
 
