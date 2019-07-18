@@ -5,8 +5,7 @@ library(shiny)
 ui <- bootstrapPage(
         sidebarPanel(
           titlePanel("HPV integration pipeline results"),
-          inputPanel(fileInput("sam", "SAM file", accept = "*.sam"),
-                     fileInput("summ", "Blat summary file", accept = "*_summary.tsv")),
+          inputPanel(fileInput("visu", "Visualisation file", accept = "*.rds")),
           inputPanel(selectizeInput("genotype",
                                     "Genotypes",
                                     "",
