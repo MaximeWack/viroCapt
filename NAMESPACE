@@ -3,6 +3,7 @@
 export("%>%")
 export(cleaned_blat)
 export(create_profile)
+export(create_visu)
 export(extract_fasta)
 export(plot_depth)
 export(plot_final)

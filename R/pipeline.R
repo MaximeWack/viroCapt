@@ -41,6 +41,24 @@ create_profile <- function(stem)
   }
 }
 
+#' Create the visualisation object
+#'
+#' @export
+#' @param sam Stem name of the rds file for the sequencing depth
+#' @param summ Stem name of the blat summary file
+create_visu <- function(sam, summ, visu)
+{
+  stringr::str_c(summ, "_summary.tsv") %>%
+    read_summary -> summ_blat
+
+  stringr::str_c(sam, ".rds") %>%
+    readRDS -> sam
+
+  list(summary = summ_blat,
+       profile = sam) %>%
+  saveRDS(visu)
+}
+
 
 #' Plot the final plot
 #'

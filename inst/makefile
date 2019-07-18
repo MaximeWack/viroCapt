@@ -5,6 +5,7 @@ GLOBALDIR=02_Global
 LOCALDIR=03_Local
 FASTADIR=04_Fasta
 BLATDIR=05_Blat
+VISUDIR=06_Visu
 
 THREADS=2
 BT_OPTIONS_GLOBAL=--no-unal --very-sensitive
@@ -24,7 +25,10 @@ fastqs=$(shell \
 	| sort \
 	| uniq)
 
-All: QC Local_plot Final_plot
+All: QC Local_plot Final_plot Visu
+
+# Create an R object to use in the visualisation
+Visu: $(patsubst %, $(DATADIR)/$(VISUDIR)/%.rds, $(fastqs))
 
 # Plot the final Plots
 Final_plot: $(patsubst %, $(DATADIR)/$(BLATDIR)/%.png, $(fastqs))
@@ -64,6 +68,11 @@ QC: $(patsubst %, $(DATADIR)/$(QCDIR)/%.png, $(fastqs))
 
 # QC_sam
 # QC_sam: $(patsubst %, $(DATADIR)/$(QCDIR)/%.sam, $(fastqs))
+
+# Create an R object to use in the visualisation
+$(DATADIR)/$(VISUDIR)/%.rds: $(DATADIR)/$(BLATDIR)/%_summary.tsv $(DATADIR)/$(LOCALDIR)/%.rds $(DATADIR)/$(VISUDIR)
+	@echo -e $(red) "Creating the visualisation object for $*" $(end)
+	Rscript -e 'HPVcap::create_visu("$(DATADIR)/$(LOCALDIR)/$*", "$(DATADIR)/$(BLATDIR)/$*", "$@")'
 
 # Plot a final plot
 $(DATADIR)/$(BLATDIR)/%.png: $(DATADIR)/$(BLATDIR)/%_summary.tsv $(DATADIR)/$(LOCALDIR)/%.rds
@@ -201,7 +210,6 @@ $(DATADIR)/$(QCDIR)/%.rds: $(DATADIR)/$(QCDIR)/%.sam
 	@echo -e $(red) "Computing sequencing profile for $*" $(end)
 	Rscript -e 'HPVcap::create_profile("$(DATADIR)/$(QCDIR)/$*")'
 
-
 # Quality control pairend gzipped
 $(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(QCDIR) Refs
 	@echo -e $(red) "Running pair-end quality control for $*" $(end)
@@ -231,6 +239,11 @@ $(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.U.fastq | $(DATADIR)/$(QCDIR) Refs
 		| samtools view > $@
 
 ## Create dirs
+
+# Create Visu dir
+$(DATADIR)/$(VISUDIR):
+	@echo -e $(red) "Creating $@" $(end)
+	mkdir $@
 
 # Create Blat dir
 $(DATADIR)/$(BLATDIR):
@@ -273,4 +286,4 @@ hg19.2bit:
 
 ## Phony targets
 
-.PHONY: All Refs QC_sam QC Global Genotyping Selection Local Profile
+.PHONY: All Refs QC_sam QC Global Genotyping Selection Local Profile Visu
