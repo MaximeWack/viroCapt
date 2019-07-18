@@ -5,26 +5,39 @@
 #' @param limit Limit the number of genotypes to display
 plot_depth <- function(stem, limit = 5)
 {
+  stringr::str_c(stem, ".rds") %>%
+    readRDS -> sam
+
+    sam %>%
+      limit_genotypes(limit) %>%
+      ggplot_depth -> Plot
+
+    stringr::str_c(stem, ".png") %>%
+      ggplot2::ggsave(Plot)
+}
+
+
+#' Create the profile object
+#'
+#' @export
+#' @param sam Stem name of the sam file
+create_profile <- function(stem)
+{
   stringr::str_c(stem, ".sam") %>%
     read_sam -> sam
 
   if (length(sam) > 0)
   {
     sam %>%
-      limit_genotypes(limit) %>%
       dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
       tidyr::unnest() %>%
       read_depth %>%
-      # normalise_depth(qc_norm) %>%
       downsample %>%
-      # MA(15) %>%
-      ggplot_depth -> Plot
-
-    stringr::str_c(stem, ".png") %>%
-      ggplot2::ggsave(Plot)
+      saveRDS(stringr::str_c(stem, ".rds"))
   } else
   {
-    cat(NULL, file = stringr::str_c(stem, ".png"))
+    tibble::tibble(genotype = factor("No result"), pos = 0, n = 0) %>%
+      saveRDS(stringr::str_c(stem, ".rds"))
   }
 }
 
@@ -40,10 +53,10 @@ plot_final <- function(sam, summ, limit = 1)
   stringr::str_c(summ, "_summary.tsv") %>%
     read_summary -> summ_blat
 
-  stringr::str_c(sam, ".sam") %>%
-    read_sam -> sam
+  stringr::str_c(sam, ".rds") %>%
+    readRDS -> sam
 
-  if (length(sam) > 0 & length(summ_blat) > 0)
+  if (length(summ_blat) > 0)
   {
     sam %>%
       limit_genotypes(limit) -> sam
@@ -52,12 +65,6 @@ plot_final <- function(sam, summ, limit = 1)
       dplyr::semi_join(sam, by = "genotype") -> summ_blat
 
     sam %>%
-      dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
-      tidyr::unnest() %>%
-      read_depth %>%
-      # normalise_depth(qc_norm) %>%
-      downsample %>%
-      # MA(15) %>%
       ggplot_final(summ_blat) -> Plot
 
     stringr::str_c(summ, ".png") %>%

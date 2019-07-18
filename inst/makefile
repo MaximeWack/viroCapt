@@ -44,6 +44,9 @@ Extract_fasta: $(patsubst %, $(DATADIR)/$(FASTADIR)/%.fa, $(fastqs))
 # Plots for local alignment
 Local_plot: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.png, $(fastqs))
 
+# # Sequencing profile generation for plots
+# Profile: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.rds, $(fastqs))
+
 # Local alignment
 Local: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.sam, $(fastqs))
 
@@ -63,7 +66,7 @@ QC: $(patsubst %, $(DATADIR)/$(QCDIR)/%.png, $(fastqs))
 # QC_sam: $(patsubst %, $(DATADIR)/$(QCDIR)/%.sam, $(fastqs))
 
 # Plot a final plot
-$(DATADIR)/$(BLATDIR)/%.png: $(DATADIR)/$(BLATDIR)/%_summary.tsv $(DATADIR)/$(LOCALDIR)/%.png
+$(DATADIR)/$(BLATDIR)/%.png: $(DATADIR)/$(BLATDIR)/%_summary.tsv $(DATADIR)/$(LOCALDIR)/%.rds
 	@echo -e $(red) "Plotting the final plot for $*" $(end)
 	Rscript -e 'HPVcap::plot_final("$(DATADIR)/$(LOCALDIR)/$*", "$(DATADIR)/$(BLATDIR)/$*", limit = $(FINAL_PLOT_LIMIT))'
 
@@ -88,9 +91,14 @@ $(DATADIR)/$(FASTADIR)/%.fa: $(DATADIR)/$(LOCALDIR)/%.sam | $(DATADIR)/$(FASTADI
 	Rscript -e 'HPVcap::extract_fasta("$<", "$@")'
 
 # Local alignment plot
-$(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.sam
+$(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.rds
 	@echo -e $(red) "Plotting local alignment for $*" $(end)
 	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(LOCALDIR)/$*", limit = $(LOCAL_PLOT_LIMIT))'
+
+# Profile
+$(DATADIR)/$(LOCALDIR)/%.rds: $(DATADIR)/$(LOCALDIR)/%.sam
+	@echo -e $(red) "Computing sequencing profile for $*" $(end)
+	Rscript -e 'HPVcap::create_profile("$(DATADIR)/$(LOCALDIR)/$*")'
 
 ## Local alignment pairend gzipped
 $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(LOCALDIR) Refs
@@ -184,9 +192,15 @@ $(DATADIR)/$(GLOBALDIR)/%.sam: $(DATADIR)/%.U.fastq | $(DATADIR)/$(GLOBALDIR) Re
 ## QC
 
 # Quality control plot
-$(DATADIR)/$(QCDIR)/%.png: $(DATADIR)/$(QCDIR)/%.sam
+$(DATADIR)/$(QCDIR)/%.png: $(DATADIR)/$(QCDIR)/%.rds
 	@echo -e $(red) "Plotting quality control for $*" $(end)
 	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(QCDIR)/$*")'
+
+# Quality control profile
+$(DATADIR)/$(QCDIR)/%.rds: $(DATADIR)/$(QCDIR)/%.sam
+	@echo -e $(red) "Computing sequencing profile for $*" $(end)
+	Rscript -e 'HPVcap::create_profile("$(DATADIR)/$(QCDIR)/$*")'
+
 
 # Quality control pairend gzipped
 $(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(QCDIR) Refs
@@ -259,4 +273,4 @@ hg19.2bit:
 
 ## Phony targets
 
-.PHONY: All Refs QC_sam QC Global Genotyping Selection Local
+.PHONY: All Refs QC_sam QC Global Genotyping Selection Local Profile
