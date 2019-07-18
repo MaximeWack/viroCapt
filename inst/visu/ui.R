@@ -1,6 +1,8 @@
 library(tidyverse)
 library(HPVcap)
 library(shiny)
+library(plotly)
+
 
 ui <- bootstrapPage(
         sidebarPanel(
@@ -18,7 +20,7 @@ ui <- bootstrapPage(
                                     "Chromosomes",
                                     "",
                                     multiple = T),
-                     sliderInput("nreads", "Nombre de reads minimum", 0, 0, 0, step = 1, round = T),
-                     sliderInput("match", "Score minimal de matching", 0, 0, 0, step = 1, round = T))),
+                     sliderInput("nreads", "Minimum number of reads", 0, 0, 0, step = 1, round = T),
+                     sliderInput("match", "Minimum match score", 0, 0, 0, step = 1, round = T))),
         mainPanel(plotlyOutput("plot"),
                   DT::dataTableOutput("table")))
