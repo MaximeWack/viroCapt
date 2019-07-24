@@ -110,7 +110,17 @@ server <- function(input, output, session)
       theme_classic()
   })
 
-  output$table <- DT::renderDataTable(summ_blat())
+  output$table <- DT::renderDataTable(
+  {
+    summ_blat() %>%
+      mutate_at(vars(feature, chr, quality), factor)
+  },
+  options = list(dom = "Bfrtip", 
+                 buttons = c("copy", "excel"),
+                 paging = F,
+                 info = F,
+                 fixedHeader = T),
+  filter = "top")
 }
 
 shinyApp(ui, server)
