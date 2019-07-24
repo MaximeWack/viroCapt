@@ -23,7 +23,7 @@ ui <- bootstrapPage(
                                       multiple = T),
                        sliderInput("nreads", "Minimum number of reads", 0, 0, 0, step = 1, round = T),
                        sliderInput("match", "Minimum match score", 0, 0, 0, step = 1, round = T)),
-                       width = 2),
+                       width = 3),
           mainPanel(plotlyOutput("plot"),
                   DT::dataTableOutput("table"),
-                  width = 10)))
+                  width = 9)))
