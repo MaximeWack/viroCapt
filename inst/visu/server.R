@@ -122,5 +122,3 @@ server <- function(input, output, session)
                  fixedHeader = T),
   filter = "top")
 }
-
-shinyApp(ui, server)
