@@ -115,10 +115,11 @@ server <- function(input, output, session)
     summ_blat() %>%
       mutate_at(vars(feature, chr, quality), factor)
   },
-  options = list(dom = "Bfrtip", 
+  options = list(dom = "Bfrtip",
                  buttons = c("copy", "excel"),
                  paging = F,
                  info = F,
                  fixedHeader = T),
-  filter = "top")
+  filter = "top",
+  extensions = "Buttons")
 }
