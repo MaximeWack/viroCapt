@@ -52,7 +52,6 @@ server <- function(input, output, session)
       setNames(str_c(genotypes$genotype, " (", genotypes$n, ")")) -> genotypes
 
     updateSelectizeInput(session, "genotype", choices = genotypes, selected = genotypes[1])
-
   })
 
   observe({
@@ -117,7 +116,7 @@ server <- function(input, output, session)
   },
   options = list(dom = "Bfrtip",
                  buttons = c("copy", "excel"),
-                 paging = F,
+                 paging = T,
                  info = F,
                  fixedHeader = T),
   filter = "top",
