@@ -19,7 +19,7 @@ red="\033[0;31m"
 end="\033[0m"
 
 fastqs=$(shell \
-	find $(DATADIR) -type f -name '*.fastq*' \
+	find $(DATADIR) -maxdepth 1 -type f -name '*.fastq*' \
 	| sed -r 's%\.(R[[:digit:]]|U)\.fastq.*%%' \
 	| sed -r 's%$(DATADIR)\/%%' \
 	| sort \
