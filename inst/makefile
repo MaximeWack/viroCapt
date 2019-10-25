@@ -60,7 +60,7 @@ Selection: $(patsubst %, $(DATADIR)/$(GLOBALDIR)/%.tsv.sel, $(fastqs))
 # Genotyping
 Genotyping: $(patsubst %, $(DATADIR)/$(GLOBALDIR)/%.tsv, $(fastqs))
 
-# Global alignement
+# Global alignment
 # Global: $(patsubst %, $(DATADIR)/$(GLOBALDIR)/%.sam, $(fastqs))
 
 # QC
