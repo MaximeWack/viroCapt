@@ -42,7 +42,7 @@ Clean_blat: $(patsubst %, $(DATADIR)/$(BLATDIR)/%_cleaned.tsv, $(fastqs))
 # Blat the fasta files
 Blat: $(patsubst %, $(DATADIR)/$(BLATDIR)/%.tsv, $(fastqs))
 
-# Extract fasta files for non-HPV sequences
+# Extract fasta files for non-viral sequences
 Extract_fasta: $(patsubst %, $(DATADIR)/$(FASTADIR)/%.fa, $(fastqs))
 
 # Plots for local alignment
@@ -72,42 +72,42 @@ QC: $(patsubst %, $(DATADIR)/$(QCDIR)/%.png, $(fastqs))
 # Create an R object to use in the visualisation
 $(DATADIR)/$(VISUDIR)/%.rds: $(DATADIR)/$(BLATDIR)/%_summary.tsv $(DATADIR)/$(LOCALDIR)/%.rds $(DATADIR)/$(VISUDIR)
 	@echo -e $(red) "Creating the visualisation object for $*" $(end)
-	Rscript -e 'HPVcap::create_visu("$(DATADIR)/$(LOCALDIR)/$*", "$(DATADIR)/$(BLATDIR)/$*", "$@")'
+	Rscript -e 'viroCapt::create_visu("$(DATADIR)/$(LOCALDIR)/$*", "$(DATADIR)/$(BLATDIR)/$*", "$@")'
 
 # Plot a final plot
 $(DATADIR)/$(BLATDIR)/%.png: $(DATADIR)/$(BLATDIR)/%_summary.tsv $(DATADIR)/$(LOCALDIR)/%.rds
 	@echo -e $(red) "Plotting the final plot for $*" $(end)
-	Rscript -e 'HPVcap::plot_final("$(DATADIR)/$(LOCALDIR)/$*", "$(DATADIR)/$(BLATDIR)/$*", limit = $(FINAL_PLOT_LIMIT))'
+	Rscript -e 'viroCapt::plot_final("$(DATADIR)/$(LOCALDIR)/$*", "$(DATADIR)/$(BLATDIR)/$*", limit = $(FINAL_PLOT_LIMIT))'
 
 # Summarise a cleaned blat file
 $(DATADIR)/$(BLATDIR)/%_summary.tsv: $(DATADIR)/$(BLATDIR)/%_cleaned.tsv
 	@echo -e $(red) "Summarizing cleaned blat file for $*" $(end)
-	Rscript -e 'HPVcap::summarised_blat("$<", "$@")'
+	Rscript -e 'viroCapt::summarised_blat("$<", "$@")'
 
 # Clean a blat file
 $(DATADIR)/$(BLATDIR)/%_cleaned.tsv: $(DATADIR)/$(BLATDIR)/%.tsv $(DATADIR)/$(FASTADIR)/%.fa
 	@echo -e $(red) "Cleaning blat file for $*" $(end)
-	Rscript -e 'HPVcap::cleaned_blat("$(word 1, $^)", "$(word 2, $^)", "$@")'
+	Rscript -e 'viroCapt::cleaned_blat("$(word 1, $^)", "$(word 2, $^)", "$@")'
 
 # Blat the fasta files
 $(DATADIR)/$(BLATDIR)/%.tsv: $(DATADIR)/$(FASTADIR)/%.fa | $(DATADIR)/$(BLATDIR) hg19.2bit
-	@echo -e $(red) "Blat non-HPV sequences for $*" $(end)
+	@echo -e $(red) "Blat non-viral sequences for $*" $(end)
 	blat hg19.2bit $< $@ $(BLAT_OPTIONS)
 
-# Extract non HPV sequences as fasta files
+# Extract non-viral sequences as fasta files
 $(DATADIR)/$(FASTADIR)/%.fa: $(DATADIR)/$(LOCALDIR)/%.sam | $(DATADIR)/$(FASTADIR)
-	@echo -e $(red) "Extracting non-HPV sequences for $*" $(end)
-	Rscript -e 'HPVcap::extract_fasta("$<", "$@")'
+	@echo -e $(red) "Extracting non-viral sequences for $*" $(end)
+	Rscript -e 'viroCapt::extract_fasta("$<", "$@")'
 
 # Local alignment plot
 $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.rds
 	@echo -e $(red) "Plotting local alignment for $*" $(end)
-	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(LOCALDIR)/$*", limit = $(LOCAL_PLOT_LIMIT))'
+	Rscript -e 'viroCapt::plot_depth("$(DATADIR)/$(LOCALDIR)/$*", limit = $(LOCAL_PLOT_LIMIT))'
 
 # Profile
 $(DATADIR)/$(LOCALDIR)/%.rds: $(DATADIR)/$(LOCALDIR)/%.sam
 	@echo -e $(red) "Computing sequencing profile for $*" $(end)
-	Rscript -e 'HPVcap::create_profile("$(DATADIR)/$(LOCALDIR)/$*")'
+	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(LOCALDIR)/$*")'
 
 ## Local alignment pairend gzipped
 $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(LOCALDIR) Refs
@@ -203,12 +203,12 @@ $(DATADIR)/$(GLOBALDIR)/%.sam: $(DATADIR)/%.U.fastq | $(DATADIR)/$(GLOBALDIR) Re
 # Quality control plot
 $(DATADIR)/$(QCDIR)/%.png: $(DATADIR)/$(QCDIR)/%.rds
 	@echo -e $(red) "Plotting quality control for $*" $(end)
-	Rscript -e 'HPVcap::plot_depth("$(DATADIR)/$(QCDIR)/$*")'
+	Rscript -e 'viroCapt::plot_depth("$(DATADIR)/$(QCDIR)/$*")'
 
 # Quality control profile
 $(DATADIR)/$(QCDIR)/%.rds: $(DATADIR)/$(QCDIR)/%.sam
 	@echo -e $(red) "Computing sequencing profile for $*" $(end)
-	Rscript -e 'HPVcap::create_profile("$(DATADIR)/$(QCDIR)/$*")'
+	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(QCDIR)/$*")'
 
 # Quality control pairend gzipped
 $(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(QCDIR) Refs

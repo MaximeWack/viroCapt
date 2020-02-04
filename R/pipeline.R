@@ -94,7 +94,7 @@ plot_final <- function(sam, summ, limit = 1)
 }
 
 
-#' Extract non-HPV sequences as fasta files
+#' Extract non-viral sequences as fasta files
 #'
 #' @export
 #' @param samfile A local alignment sam file

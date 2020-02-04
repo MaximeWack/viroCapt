@@ -1,5 +1,5 @@
 library(tidyverse)
-library(HPVcap)
+library(viroCapt)
 library(shiny)
 library(plotly)
 
@@ -63,7 +63,7 @@ server <- function(input, output, session)
 
   downsampled_depths <- reactive({
     sam() %>%
-      HPVcap:::downsample(10)
+      viroCapt:::downsample(10)
   })
 
   depths <- reactive({
@@ -89,7 +89,7 @@ server <- function(input, output, session)
   })
 
   localplot <- reactive({
-    HPVcap:::ggplot_depth(depths())
+    viroCapt:::ggplot_depth(depths())
   })
 
   output$plot <- renderPlotly({

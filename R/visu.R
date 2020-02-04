@@ -2,9 +2,9 @@
 #'
 #' @export
 visu <- function() {
-  appDir <- system.file("visu", package = "HPVcap")
+  appDir <- system.file("visu", package = "viroCapt")
   if (appDir == "") {
-    stop("Could not find example directory. Try re-installing `HPVcap`.", call. = FALSE)
+    stop("Could not find example directory. Try re-installing `viroCapt`.", call. = FALSE)
   }
 
   shiny::runApp(appDir, display.mode = "normal")

@@ -55,7 +55,7 @@ normalise_depth <- function(depth, qc_norm)
 
 #' Downsample and object of sequencing depth
 #'
-#' The sequencing depth object has a width corresponding to the length of the aligned genome (~8000bp for HPV)
+#' The sequencing depth object has a width corresponding to the length of the aligned genome (eg. ~8000bp for HPV)
 #' This is way too large for plotting on a regular screen
 #' This function allows the downsampling of a depth object to speed up other operations, such as plotting
 #'
@@ -155,8 +155,8 @@ parse_cigar <- function(cigar)
 #' Extract relevant features from a parsed CIGAR string
 #'
 #' @param parsed_cigar A parsed CIGAR as a dataframe (as returned by parse_cigar)
-#' @param pos The matching position on HPV for that CIGAR string
-#' @return A dataframe of features with their position on HPV
+#' @param pos The matching position on the viral sequence for that CIGAR string
+#' @return A dataframe of features with their position on the viral sequence
 extract_features <- function(parsed_cigar, pos)
 {
   parsed_cigar$length_read %>% sum -> read_length

@@ -1,5 +1,5 @@
 library(tidyverse)
-library(HPVcap)
+library(viroCapt)
 library(shiny)
 library(plotly)
 
@@ -7,7 +7,7 @@ library(plotly)
 ui <- bootstrapPage(
         sidebarLayout(
           sidebarPanel(
-            titlePanel("HPV integration pipeline results"),
+            titlePanel("Viral integration pipeline results"),
             inputPanel(fileInput("visu", "Visualisation file", accept = "*.rds")),
             inputPanel(selectizeInput("genotype",
                                       "Genotypes",
