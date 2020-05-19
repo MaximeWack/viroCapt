@@ -1,6 +1,0 @@
-* TODO Overlay gaps in HPV probes
- Use the [[file:HPV/Couverture%20sondes%20HPV/IRN1000002533_HPV_24Jul2019_capture_targets.bed][bed file]] to overlay gaps in probe designs on the HPV profile in shiny visualiser.
-* TODO Draw profile even if no match
-Prevent any error when opening a result file
-* TODO Sprinkle some `reqs` around
-Prevent errors
