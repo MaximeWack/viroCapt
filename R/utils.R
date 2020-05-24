@@ -1,11 +1,3 @@
-#' Replace invalid values in a (NA, NaN, NULL) with default value b
-#'
-#' @param a Any value
-#' @param b A default return value
-#' @return Either a, or b if a is any of NULL, NA, NaN
-`%||%` <- function(a, b) if (length(a) == 0) b else if (a %>% is.na) b else a
-
-
 #' Compose two functions (sequence order, not composition order)
 #'
 #' @param f A function a -> b
