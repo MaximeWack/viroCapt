@@ -7,3 +7,5 @@
 #' @importFrom dplyr %>%
 #' @usage lhs \%>\% rhs
 NULL
+
+#' @importFrom base T

@@ -9,11 +9,16 @@ Description: Provides wrappers around bioinformatics tools, plotting functions, 
 Depends: R (>= 3.4.4)
 License: GPL-3 + file LICENSE
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0
 ByteCompile: true
 Imports:
     dplyr,
     tidyr,
+    readr,
+    forcats,
     ggplot2,
     patchwork,
+    plotly,
+    purrr,
+    DT,
     shiny

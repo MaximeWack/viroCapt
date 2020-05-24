@@ -20,7 +20,7 @@ plot_depth <- function(stem, limit = 5)
 #' Create the profile object
 #'
 #' @export
-#' @param sam Stem name of the sam file
+#' @param stem Stem name of the sam file
 create_profile <- function(stem)
 {
   paste0(stem, ".sam") %>%
@@ -46,6 +46,7 @@ create_profile <- function(stem)
 #' @export
 #' @param sam Stem name of the rds file for the sequencing depth
 #' @param summ Stem name of the blat summary file
+#' @param visu Name of the RDS file to same the viz data to
 create_visu <- function(sam, summ, visu)
 {
   paste0(summ, "_summary.tsv") %>%
