@@ -218,7 +218,7 @@ write_fasta <- function(parsed_sam, fastafile)
 read_fasta <- function(fastafile)
 {
   fastafile %>%
-    readr::read_lines() -> raw
+    readLines() -> raw
 
     data.frame(desc = sub("^>", "", raw[c(T, F)]),
                nalign_seq = raw[c(F, T)],
@@ -230,10 +230,13 @@ read_fasta <- function(fastafile)
 
 #' Write a blat file
 #'
-#' Copy of readr::write_tsv
+#' write.table with tab separator and without rownames
 #'
 #' @export
-write_blat <- readr::write_tsv
+#' @param x Blat object
+#' @param file File name
+write_blat <- function(x, file = "")
+  utils::write.table(x, file, sep = "\t", row.names = F)
 
 
 #' Read a headerless blat file
@@ -373,7 +376,7 @@ summarise_blat <- function(blat)
 #' @return A blat summary object
 read_summary <- function(summ_blat)
 {
-  readr::read_tsv(summ_blat) -> blat
+  utils::read.delim(summ_blat) -> blat
 
   if (length(blat) > 0)
     blat %>%

@@ -157,7 +157,7 @@ cleaned_blat <- function(blatfile, fastafile, cleaned)
 summarised_blat <- function(blatfile, summarised)
 {
   blatfile %>%
-    readr::read_tsv() -> blat
+    utils::read.delim() -> blat
 
   if (length(blat) > 0)
   {
