@@ -1,6 +1,6 @@
 Package: viroCapt
 Title: Viral capture analysis pipeline
-Version: 3.0.0
+Version: 3.0.1
 Authors@R: c(person("Maxime", "Wack", email = "maxime.wack@aphp.fr", role = c("aut", "cre")),
              person("Bastien", "Rance", email = "bastien.rance@aphp.fr", role = c("aut")),
              person("David", "Veyer", email = "david.veyer@aphp.fr", role = c("aut")),
