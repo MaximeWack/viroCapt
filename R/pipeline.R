@@ -5,14 +5,14 @@
 #' @param limit Limit the number of genotypes to display
 plot_depth <- function(stem, limit = 5)
 {
-  stringr::str_c(stem, ".rds") %>%
+  paste0(stem, ".rds") %>%
     readRDS -> sam
 
     sam %>%
       limit_genotypes(limit) %>%
       ggplot_depth -> Plot
 
-    stringr::str_c(stem, ".png") %>%
+    paste0(stem, ".png") %>%
       ggplot2::ggsave(Plot)
 }
 
@@ -23,7 +23,7 @@ plot_depth <- function(stem, limit = 5)
 #' @param sam Stem name of the sam file
 create_profile <- function(stem)
 {
-  stringr::str_c(stem, ".sam") %>%
+  paste0(stem, ".sam") %>%
     read_sam -> sam
 
   if (length(sam) > 0)
@@ -33,7 +33,7 @@ create_profile <- function(stem)
       tidyr::unnest() %>%
       read_depth %>%
       downsample %>%
-      saveRDS(stringr::str_c(stem, ".rds"))
+      saveRDS(paste0(stem, ".rds"))
   } else
   {
     data.frame(genotype = "No result", pos = 0, n = 0, stringsAsFactors = T) %>%
@@ -48,10 +48,10 @@ create_profile <- function(stem)
 #' @param summ Stem name of the blat summary file
 create_visu <- function(sam, summ, visu)
 {
-  stringr::str_c(summ, "_summary.tsv") %>%
+  paste0(summ, "_summary.tsv") %>%
     read_summary -> summ_blat
 
-  stringr::str_c(sam, ".rds") %>%
+  paste0(sam, ".rds") %>%
     readRDS -> sam
 
   list(summary = summ_blat,
@@ -68,10 +68,10 @@ create_visu <- function(sam, summ, visu)
 #' @param limit Limit the number of genotypes to display
 plot_final <- function(sam, summ, limit = 1)
 {
-  stringr::str_c(summ, "_summary.tsv") %>%
+  paste0(summ, "_summary.tsv") %>%
     read_summary -> summ_blat
 
-  stringr::str_c(sam, ".rds") %>%
+  paste0(sam, ".rds") %>%
     readRDS -> sam
 
   if (length(summ_blat) > 0)
@@ -85,11 +85,11 @@ plot_final <- function(sam, summ, limit = 1)
     sam %>%
       ggplot_final(summ_blat) -> Plot
 
-    stringr::str_c(summ, ".png") %>%
+    paste0(summ, ".png") %>%
       ggplot2::ggsave(Plot)
   } else
   {
-    cat(NULL, file = stringr::str_c(summ, ".png"))
+    cat(NULL, file = paste0(summ, ".png"))
   }
 }
 
@@ -107,7 +107,7 @@ extract_fasta <- function(samfile, fastafile)
   if (length(sam) > 0)
   {
     sam %>%
-      dplyr::filter(cigar %>% stringr::str_detect("S")) %>%
+      dplyr::filter(grepl("S", cigar)) %>%
       dplyr::mutate(parsed = cigar %>% parse_cigar,
                     parsed = purrr::map2(parsed, pos, extract_features)) %>%
       tidyr::unnest() %>%
