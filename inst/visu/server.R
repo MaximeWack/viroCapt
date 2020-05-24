@@ -1,19 +1,17 @@
-library(tidyverse)
 library(viroCapt)
+library(ggplot2)
 library(shiny)
-library(plotly)
 
 options(shiny.maxRequestSize = 1024 ^ 3)
-# options(shiny.reactlog = TRUE)
 
 UIlabels <- function(variable)
 {
   variable %>%
-    fct_infreq %>%
+    forcats::fct_infreq() %>%
     summary -> varsumm
 
   names(varsumm) %>%
-    setNames(str_c(names(varsumm), " (", varsumm, ")"))
+    stats::setNames(paste0(names(varsumm), " (", varsumm, ")"))
 }
 
 server <- function(input, output, session)
@@ -22,8 +20,7 @@ server <- function(input, output, session)
   visu <- reactive({
     req(input$visu)
 
-    input$visu$datapath %>%
-      readRDS
+    readRDS(input$visu$datapath)
   })
 
   # Extract the sequencing depth object
@@ -38,18 +35,18 @@ server <- function(input, output, session)
     req(visu())
 
     visu()$summary %>%
-      mutate(quality = quality %>% fct_drop)
+      dplyr::mutate(quality = quality %>% forcats::fct_drop())
   })
 
   # Set UI values
   observe({
     sam() %>%
-      group_by(genotype) %>%
-      summarise(n = max(n)) %>%
-      mutate(genotype = genotype %>% as.character) -> genotypes
+      dplyr::group_by(genotype) %>%
+      dplyr::summarise(n = max(n)) %>%
+      dplyr::mutate(genotype = genotype %>% as.character) -> genotypes
 
     genotypes$genotype %>%
-      setNames(str_c(genotypes$genotype, " (", genotypes$n, ")")) -> genotypes
+      stats::setNames(paste0(genotypes$genotype, " (", genotypes$n, ")")) -> genotypes
 
     updateSelectizeInput(session, "genotype", choices = genotypes, selected = genotypes[1])
   })
@@ -62,28 +59,27 @@ server <- function(input, output, session)
   })
 
   downsampled_depths <- reactive({
-    sam() %>%
-      viroCapt:::downsample(10)
+    sam() %>% viroCapt:::downsample(10)
   })
 
   depths <- reactive({
     req(input$genotype)
 
     downsampled_depths() %>%
-      filter(genotype %in% input$genotype)
+      dplyr::filter(genotype %in% input$genotype)
   })
 
   summ_blat <- reactive({
     summ_blat_file() %>%
-      filter(genotype %in% input$genotype,
-             n >= input$nreads,
-             match >= input$match) -> summ
+      dplyr::filter(genotype %in% input$genotype,
+                    n >= input$nreads,
+                    match >= input$match) -> summ
 
     if (! input$chrs %>% is.null)
-      summ %>% filter(chr %in% input$chrs) -> summ
+      summ %>% dplyr::filter(chr %in% input$chrs) -> summ
 
     if (! input$scores %>% is.null)
-      summ %>% filter(quality %in% input$scores) -> summ
+      summ %>% dplyr::filter(quality %in% input$scores) -> summ
 
     summ
   })
@@ -92,17 +88,17 @@ server <- function(input, output, session)
     viroCapt:::ggplot_depth(depths())
   })
 
-  output$plot <- renderPlotly({
+  output$plot <- plotly::renderPlotly({
     max(depths()$n) -> max_n
 
     localplot() +
       geom_vline(data = summ_blat(), aes(xintercept = position, color = chr, alpha = quality)) -> p
 
-    if (summ_blat() %>% filter(feature == "left") %>% nrow > 0)
-      p + geom_segment(data = summ_blat() %>% filter(feature == "left"), aes(x = position, xend = position - 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+    if (summ_blat() %>% dplyr::filter(feature == "left") %>% nrow > 0)
+      p + geom_segment(data = summ_blat() %>% dplyr::filter(feature == "left"), aes(x = position, xend = position - 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
 
-    if (summ_blat() %>% filter(feature == "right") %>% nrow > 0)
-      p + geom_segment(data = summ_blat() %>% filter(feature == "right"), aes(x = position, xend = position + 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+    if (summ_blat() %>% dplyr::filter(feature == "right") %>% nrow > 0)
+      p + geom_segment(data = summ_blat() %>% dplyr::filter(feature == "right"), aes(x = position, xend = position + 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
 
     p +
       scale_alpha_ordinal(range = c(0.5, 1)) +
@@ -112,7 +108,7 @@ server <- function(input, output, session)
   output$table <- DT::renderDataTable(
   {
     summ_blat() %>%
-      mutate_at(vars(feature, chr, quality), factor)
+      dplyr::mutate_at(vars(feature, chr, quality), factor)
   },
   options = list(dom = "Bfrtip",
                  buttons = c("copy", "excel"),
