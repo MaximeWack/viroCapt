@@ -30,7 +30,7 @@ create_profile <- function(stem)
   {
     sam %>%
       dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
-      tidyr::unnest() %>%
+      tidyr::unnest(parsed) %>%
       read_depth %>%
       downsample %>%
       saveRDS(paste0(stem, ".rds"))
@@ -110,7 +110,7 @@ extract_fasta <- function(samfile, fastafile)
       dplyr::filter(grepl("S", cigar)) %>%
       dplyr::mutate(parsed = cigar %>% parse_cigar,
                     parsed = purrr::map2(parsed, pos, extract_features)) %>%
-      tidyr::unnest() %>%
+      tidyr::unnest(parsed) %>%
       dplyr::filter(length_read > 25,
                     feature %in% c("left", "right")) %>%
       extract_unaligned %>%
