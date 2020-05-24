@@ -31,7 +31,7 @@ read_depth <- function(sam)
     dplyr::group_by(genotype) %>%
     dplyr::do(data = .$base %>%
               unlist %>%
-              tibble::tibble(pos = .) %>%
+              data.frame(pos = ., stringsAsFactors = F) %>%
               dplyr::count(pos) %>%
               tidyr::complete(pos = 1:max(pos, na.rm = T), fill = list(n = 0))) %>%
     tidyr::unnest() %>%
@@ -220,8 +220,9 @@ read_fasta <- function(fastafile)
   fastafile %>%
     readr::read_lines() -> raw
 
-    tibble::tibble(desc = stringr::str_replace(raw[c(T, F)], "^>", ""),
-           nalign_seq = raw[c(F, T)]) %>%
+    data.frame(desc = sub("^>", "", raw[c(T, F)]),
+               nalign_seq = raw[c(F, T)],
+               stringsAsFactors = F) %>%
       tidyr::separate(desc, into = c("read", "genotype", "feature", "feature_pos"), sep = "\\|") %>%
       dplyr::mutate(feature_pos = feature_pos %>% as.numeric)
 }

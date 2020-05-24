@@ -36,8 +36,8 @@ create_profile <- function(stem)
       saveRDS(stringr::str_c(stem, ".rds"))
   } else
   {
-    tibble::tibble(genotype = factor("No result"), pos = 0, n = 0) %>%
-      saveRDS(stringr::str_c(stem, ".rds"))
+    data.frame(genotype = "No result", pos = 0, n = 0, stringsAsFactors = T) %>%
+      saveRDS(paste0(stem, ".rds"))
   }
 }
 
