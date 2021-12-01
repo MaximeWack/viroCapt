@@ -1,0 +1,116 @@
+* viroCapt
+
+viroCapt is a bioinformatics pipeline and analysis platform for detecting viral insertions in the human genome from viral capture data.
+
+* Installation
+
+viroCapt is implemented as an R package, which contains the pipeline implemented as a Makefile, dedicated R functions from the package to infer, score and rank insertions candidates, and an interactive visualization Shiny webapp.
+
+** Dependancies
+
+viroCapt relies on a couple of standard bioinformatics tools that need to be installed on the system prior to using it:
+- bowtie2
+- samtools
+- blat
+
+You will also need ~make~ and ~R~ to run the pipeline itself.
+All of the R package dependancies will be installed alongside the package, using ~devtools~.
+
+** Installation 
+
+Install ~devtools~
+
+#+begin_src R
+install.packages("devtools")
+#+end_src
+
+If you have a working git installation and R configured to access internet
+
+#+begin_src R
+devtools::install_github("maximewack/viroCapt")
+#+end_src
+
+A local installation is also possible. Download the package and extract it, and run
+
+#+begin_src R
+devtools::install("/path/to/viroCapt")
+#+end_src
+
+This will install the R package that will be used by the pipeline, provide the pipeline and reference files, and the Shiny webapp.
+
+* Usage
+
+viroCapt is two part: a bioinformatics pipeline that runs in batch and produces static results, and an analysis tool that uses some of these files to produce visualizations.
+
+** Pipeline
+
+The pipeline files are copied to the package installation directory.
+You can find the location of that directory by executing the following command after the package is installed
+
+#+begin_src R
+system.file(package = "viroCapt")
+#+end_src
+
+To run the pipeline, you need the ~makefile~ file, and the ~refs~ folder, containing the reference genomes for all the HPV variants that were used in the design of the probes for HPV capture.
+It is recommanded to copy those files from the package to where you want to use them.
+
+To run the pipeline, the ~makefile~ and ~refs~ folder should be in the same folder, with ~fastq~ files to analyse in a subdirectory.
+All ~fastq~ files should be named accordingly to these patterns:
+- ~xxx.R1.fastq~ and ~xxx.R2.fastq~ for pair-end read sequencing
+- ~xxx.U.fastq~ for single read sequencing
+
+The ~fastq~ files can also be gzipped.
+
+You can then run the pipeline with ~make~, with the following options available (default value):
+- DATADIR (fastqs) : folder with the ~fastq~ files to analyse
+- THREADS (2) : number of threads to use for ~bowtie2~ and ~blat~
+- QCDIR (01_QC) : destination of the QC plots
+- GLOBALDIR (02_Global) : destination of the global alignement and crude genotyping results
+- LOCALDIR (03_Local) : destination of the local alignement files and genotyping plots
+- FASTADIR (04_Fasta) : destination of the ~fasta~ files of the candidate human sequences
+- BLATDIR (05_Blat) : destination of the raw ~blat~ results, cleaned results and ranked results
+- VISUDIR (06_Visu) : destination of the files used by the analysis tool
+- BT_OPTIONS_GLOBAL (--no-unal --very-sensitive) : ~bowtie2~ options for global alignment
+- BT_OPTIONS_LOCAL (--local --no-unal --very-sensitive-local) : ~bowtie2~ options for local alignement
+- BLAT_OPTIONS (-minScore=25 -minIdentitiy=90 -noHead) : ~blat~ options for the human alignment
+- LOCAL_PLOT_LIMIT (5) : top n genotypes to show in the local plots
+- FINAL_PLOT_LIMIT (1) : top n genotypes to show in the final plots
+
+For example, if your ~fastq~ files reside in the ~fastq_samples~ folder, and you want to run on 8 CPU threads:
+
+#+begin_src sh
+make DATADIR=fastq_samples THREADS=8
+#+end_src
+
+All the analysis results will be put in the ~01_*~ to ~06_*~ folders.
+
+** Visualization
+
+Once the pipeline has successfully run, you can use the ~rds~ files produced in the ~06_Visu~ folder in the visualization tool.
+
+In R, run
+
+#+begin_src R
+library(viroCapt)
+visu()
+#+end_src
+
+or simply
+
+#+begin_src R
+viroCapt::visu()
+#+end_src
+
+You can use any option of ~shiny::runApp()~ in ~viroCapt::visu()~ to customize how the Shiny app runs.
+For example, if you want to make the tool available to other users in the same network on port 1234
+
+#+begin_src R
+viroCapt::visu(host = "0.0.0.0",
+               port = 1234)
+#+end_src
+
+* Test data
+
+The ~fastq~ files produced by running HPV capture on the *HeLa cell line* are distributed with the package, in the ~hela/~ folder in the files installed by the package.
+They are accompanied by the expected results files and can be used to check the package is correctly installed and running.
+
