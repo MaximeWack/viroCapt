@@ -13,10 +13,12 @@ viroCapt relies on a couple of standard bioinformatics tools that need to be ins
 - samtools
 - blat
 
-You will also need ~make~ and ~R~ to run the pipeline itself.
+You will also need ~make~ and ~R~ to run the pipeline itself.\\
 All of the R package dependancies will be installed alongside the package, using ~devtools~.
 
 ** Installation 
+
+All the following commands are to be executed in an R session.
 
 Install ~devtools~
 
@@ -40,49 +42,50 @@ This will install the R package that will be used by the pipeline, provide the p
 
 * Usage
 
-viroCapt is two part: a bioinformatics pipeline that runs in batch and produces static results, and an analysis tool that uses some of these files to produce visualizations.
+viroCapt contains two parts: a bioinformatics pipeline that runs in batch and produces static results, and an analysis tool that uses some of these files to produce visualizations.
 
 ** Pipeline
 
-The pipeline files are copied to the package installation directory.
+The pipeline files are copied to the package installation directory.\\
 You can find the location of that directory by executing the following command after the package is installed
 
 #+begin_src R
 system.file(package = "viroCapt")
 #+end_src
 
-To run the pipeline, you need the ~makefile~ file, and the ~refs~ folder, containing the reference genomes for all the HPV variants that were used in the design of the probes for HPV capture.
+To run the pipeline, you need the ~makefile~ file, and the ~refs~ folder, containing the reference genomes for all the HPV variants that were used in the design of the probes for HPV capture.\\
 It is recommanded to copy those files from the package to where you want to use them.
 
-To run the pipeline, the ~makefile~ and ~refs~ folder should be in the same folder, with ~fastq~ files to analyse in a subdirectory.
+To run the pipeline, the ~makefile~ and ~refs~ folder should be in the same folder, with ~fastq~ files to analyse in a subdirectory.\\
 All ~fastq~ files should be named accordingly to these patterns:
 - ~xxx.R1.fastq~ and ~xxx.R2.fastq~ for pair-end read sequencing
 - ~xxx.U.fastq~ for single read sequencing
 
 The ~fastq~ files can also be gzipped.
 
-You can then run the pipeline with ~make~, with the following options available (default value):
-- DATADIR (fastqs) : folder with the ~fastq~ files to analyse
-- THREADS (2) : number of threads to use for ~bowtie2~ and ~blat~
-- QCDIR (01_QC) : destination of the QC plots
-- GLOBALDIR (02_Global) : destination of the global alignement and crude genotyping results
-- LOCALDIR (03_Local) : destination of the local alignement files and genotyping plots
-- FASTADIR (04_Fasta) : destination of the ~fasta~ files of the candidate human sequences
-- BLATDIR (05_Blat) : destination of the raw ~blat~ results, cleaned results and ranked results
-- VISUDIR (06_Visu) : destination of the files used by the analysis tool
-- BT_OPTIONS_GLOBAL (--no-unal --very-sensitive) : ~bowtie2~ options for global alignment
-- BT_OPTIONS_LOCAL (--local --no-unal --very-sensitive-local) : ~bowtie2~ options for local alignement
-- BLAT_OPTIONS (-minScore=25 -minIdentitiy=90 -noHead) : ~blat~ options for the human alignment
-- LOCAL_PLOT_LIMIT (5) : top n genotypes to show in the local plots
-- FINAL_PLOT_LIMIT (1) : top n genotypes to show in the final plots
+You can then run the pipeline with ~make~, with the following options available (and their default value):
+- *DATADIR* (fastqs) : folder with the ~fastq~ files to analyse
+- *THREADS* (2) : number of threads to use for ~bowtie2~ and ~blat~
+- *QCDIR* (01_QC) : destination of the QC plots
+- *GLOBALDIR* (02_Global) : destination of the global alignement and crude genotyping results
+- *LOCALDIR* (03_Local) : destination of the local alignement files and genotyping plots
+- *FASTADIR* (04_Fasta) : destination of the ~fasta~ files of the candidate human sequences
+- *BLATDIR* (05_Blat) : destination of the raw ~blat~ results, cleaned results and ranked results
+- *VISUDIR* (06_Visu) : destination of the files used by the analysis tool
+- *BT_OPTIONS_GLOBAL* (--no-unal --very-sensitive) : ~bowtie2~ options for global alignment
+- *BT_OPTIONS_LOCAL* (--local --no-unal --very-sensitive-local) : ~bowtie2~ options for local alignement
+- *BLAT_OPTIONS* (-minScore=25 -minIdentitiy=90 -noHead) : ~blat~ options for the human alignment
+- *LOCAL_PLOT_LIMIT* (5) : top n genotypes to show in the local plots
+- *FINAL_PLOT_LIMIT* (1) : top n genotypes to show in the final plots
 
-For example, if your ~fastq~ files reside in the ~fastq_samples~ folder, and you want to run on 8 CPU threads:
+For example, if your ~fastq~ files reside in the ~fastq_samples~ folder, and you want to run the pipeline on 8 CPU threads:
 
 #+begin_src sh
 make DATADIR=fastq_samples THREADS=8
 #+end_src
 
-All the analysis results will be put in the ~01_*~ to ~06_*~ folders.
+The pipeline will print the output of every command as it is used, and will print execution milestones in red.\\
+All the analysis results will appear in the ~01_*~ to ~06_*~ folders within the folder containing the source ~fastq~ files.
 
 ** Visualization
 
@@ -101,7 +104,7 @@ or simply
 viroCapt::visu()
 #+end_src
 
-You can use any option of ~shiny::runApp()~ in ~viroCapt::visu()~ to customize how the Shiny app runs.
+You can use any option of ~shiny::runApp()~ in ~viroCapt::visu()~ to customize how the Shiny app runs.\\
 For example, if you want to make the tool available to other users in the same network on port 1234
 
 #+begin_src R
@@ -111,6 +114,6 @@ viroCapt::visu(host = "0.0.0.0",
 
 * Test data
 
-The ~fastq~ files produced by running HPV capture on the *HeLa cell line* are distributed with the package, in the ~hela/~ folder in the files installed by the package.
+The ~fastq~ files produced by running HPV capture on the *HeLa cell line* are distributed with the package, in the ~hela/~ folder in the files installed by the package.\\
 They are accompanied by the expected results files and can be used to check the package is correctly installed and running.
 
