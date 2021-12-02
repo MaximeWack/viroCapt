@@ -91,14 +91,18 @@ server <- function(input, output, session)
   output$plot <- plotly::renderPlotly({
     max(depths()$n) -> max_n
 
-    localplot() +
-      geom_vline(data = summ_blat(), aes(xintercept = position, color = chr, alpha = quality)) -> p
+    if (input$scores %>% is.null)
+      localplot() -> p
+    else {
+      localplot() +
+        geom_vline(data = summ_blat(), aes(xintercept = position, color = chr, alpha = quality)) -> p
 
-    if (summ_blat() %>% dplyr::filter(feature == "left") %>% nrow > 0)
-      p + geom_segment(data = summ_blat() %>% dplyr::filter(feature == "left"), aes(x = position, xend = position - 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+      if (summ_blat() %>% dplyr::filter(feature == "left") %>% nrow > 0)
+        p + geom_segment(data = summ_blat() %>% dplyr::filter(feature == "left"), aes(x = position, xend = position - 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
 
-    if (summ_blat() %>% dplyr::filter(feature == "right") %>% nrow > 0)
-      p + geom_segment(data = summ_blat() %>% dplyr::filter(feature == "right"), aes(x = position, xend = position + 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+      if (summ_blat() %>% dplyr::filter(feature == "right") %>% nrow > 0)
+        p + geom_segment(data = summ_blat() %>% dplyr::filter(feature == "right"), aes(x = position, xend = position + 100, y = -max_n/20, yend = -max_n/20, color = chr, alpha = quality)) -> p
+    }
 
     p +
       scale_alpha_ordinal(range = c(0.5, 1)) +
