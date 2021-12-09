@@ -21,4 +21,5 @@ Imports:
     plotly,
     purrr,
     DT,
-    shiny
+    shiny,
+    furrr

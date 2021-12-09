@@ -125,30 +125,32 @@ ggplot_depth <- function(depth)
 #'
 #' @param cigar vector of CIGAR string
 #' @return parsed CIGAR as a dataframe
-parse_cigar <- function(cigar)
+parse_cigar <- function(cigar, threads)
 {
+  if (threads > 1) future::plan("multisession", workers = threads)
+
   cigar %>%
     gregexpr(pattern = "\\d+(M|I|D|S|N|H|P|=|X)") %>%
     regmatches(x = cigar) %>%
-    lapply(function(x)
-               {
-                 type <- substring(x, nchar(x))
-                 length <- substring(x, 0, nchar(x) -1) %>% as.numeric
+    furrr::future_map(function(x)
+    {
+      type <- substring(x, nchar(x))
+      length <- substring(x, 0, nchar(x) -1) %>% as.numeric
 
-                 length_read <- length
-                 length_read[type == "D"] <- 0
+      length_read <- length
+      length_read[type == "D"] <- 0
 
-                 length_hpv <- length
-                 length_hpv[type == "I"] <- 0
+      length_hpv <- length
+      length_hpv[type == "I"] <- 0
 
-                 start_read <- cumsum(length_read) - length_read + 1
-                 start_hpv <- cumsum(length_hpv) - length_hpv + 1
+      start_read <- cumsum(length_read) - length_read + 1
+      start_hpv <- cumsum(length_hpv) - length_hpv + 1
 
-                 end_read <- cumsum(length_read)
-                 end_hpv <- cumsum(length_hpv)
+      end_read <- cumsum(length_read)
+      end_hpv <- cumsum(length_hpv)
 
-                 data.frame(length_read = length_read, length_hpv = length_hpv, type = type, start_read = start_read, end_read = end_read, start_hpv = start_hpv, end_hpv = end_hpv, stringsAsFactors = F)
-               })
+      data.frame(length_read = length_read, length_hpv = length_hpv, type = type, start_read = start_read, end_read = end_read, start_hpv = start_hpv, end_hpv = end_hpv, stringsAsFactors = F)
+    })
 }
 
 
