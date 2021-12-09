@@ -32,7 +32,6 @@ create_profile <- function(stem)
       dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
       tidyr::unnest(parsed) %>%
       read_depth %>%
-      downsample %>%
       saveRDS(paste0(stem, ".rds"))
   } else
   {
