@@ -451,3 +451,23 @@ ggplot_final <- function(depth, summ_blat)
       ggplot2::scale_alpha_ordinal(limits = c("HC", "HCT"), range = c(0.5, 1)) +
       ggplot2::theme_classic()
 }
+
+#' Write the consensus file
+#'
+#' @export
+#' @param stem Stem of the sample
+#' @return Nothing, writes the %_consensus.fa file
+write_consensus <- function(stem)
+{
+  readRDS(paste0(stem, ".rds")) -> depth
+
+  depth %>%
+    dplyr::group_by(genotype) %>%
+    dplyr::do(consensus = paste0(.$consensus, collapse = "")) %>%
+    tidyr::unnest(consensus) -> consensus
+
+  paste0(">", consensus$genotype) %>%
+    paste(consensus$consensus, sep = "\n") %>%
+    cat(file = paste0(stem, "_consensus.fa"), sep = "\n\n")
+
+}

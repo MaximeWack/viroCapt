@@ -25,7 +25,7 @@ fastqs=$(shell \
 	| sort \
 	| uniq)
 
-All: QC Local_plot Final_plot Visu
+All: QC Local_plot Consensus Final_plot Visu
 
 # Create an R object to use in the visualisation
 Visu: $(patsubst %, $(DATADIR)/$(VISUDIR)/%.rds, $(fastqs))
@@ -44,6 +44,9 @@ Blat: $(patsubst %, $(DATADIR)/$(BLATDIR)/%.tsv, $(fastqs))
 
 # Extract fasta files for non-viral sequences
 Extract_fasta: $(patsubst %, $(DATADIR)/$(FASTADIR)/%.fa, $(fastqs))
+
+# Generate consensus
+Consensus: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%_consensus.fa, $(fastqs))
 
 # Plots for local alignment
 Local_plot: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.png, $(fastqs))
@@ -98,6 +101,11 @@ $(DATADIR)/$(BLATDIR)/%.tsv: $(DATADIR)/$(FASTADIR)/%.fa | $(DATADIR)/$(BLATDIR)
 $(DATADIR)/$(FASTADIR)/%.fa: $(DATADIR)/$(LOCALDIR)/%.sam | $(DATADIR)/$(FASTADIR)
 	@echo -e $(red) "Extracting non-viral sequences for $*" $(end)
 	Rscript -e 'viroCapt::extract_fasta("$<", "$@", $(THREADS))'
+
+# Consensus files
+$(DATADIR)/$(LOCALDIR)/%_consensus.fa: $(DATADIR)/$(LOCALDIR)/%.rds
+	@echo -e $(red) "Writing computed consensus for $*" $(end)
+	Rscript -e 'viroCapt::write_consensus("$(DATADIR)/$(LOCALDIR)/$*")'
 
 # Local alignment plot
 $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.rds
