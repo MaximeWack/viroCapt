@@ -52,7 +52,7 @@ Consensus: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%_consensus.fa, $(fastqs))
 Local_plot: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.png, $(fastqs))
 
 # # Sequencing profile generation for plots
-# Profile: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.rds, $(fastqs))
+Profile: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.rds, $(fastqs))
 
 # Local alignment
 Local: $(patsubst %, $(DATADIR)/$(LOCALDIR)/%.sam, $(fastqs))
