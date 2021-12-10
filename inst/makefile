@@ -97,7 +97,7 @@ $(DATADIR)/$(BLATDIR)/%.tsv: $(DATADIR)/$(FASTADIR)/%.fa | $(DATADIR)/$(BLATDIR)
 # Extract non-viral sequences as fasta files
 $(DATADIR)/$(FASTADIR)/%.fa: $(DATADIR)/$(LOCALDIR)/%.sam | $(DATADIR)/$(FASTADIR)
 	@echo -e $(red) "Extracting non-viral sequences for $*" $(end)
-	Rscript -e 'viroCapt::extract_fasta("$<", "$@")'
+	Rscript -e 'viroCapt::extract_fasta("$<", "$@", $(THREADS))'
 
 # Local alignment plot
 $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.rds
@@ -106,8 +106,8 @@ $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.rds
 
 # Profile
 $(DATADIR)/$(LOCALDIR)/%.rds: $(DATADIR)/$(LOCALDIR)/%.sam
-	@echo -e $(red) "Computing sequencing profile for $*" $(end)
-	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(LOCALDIR)/$*")'
+	@echo -e $(red) "Computing sequencing profile and consensus sequences for $*" $(end)
+	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(LOCALDIR)/$*", $(THREADS))'
 
 ## Local alignment pairend gzipped
 $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(LOCALDIR) Refs
@@ -208,7 +208,7 @@ $(DATADIR)/$(QCDIR)/%.png: $(DATADIR)/$(QCDIR)/%.rds
 # Quality control profile
 $(DATADIR)/$(QCDIR)/%.rds: $(DATADIR)/$(QCDIR)/%.sam
 	@echo -e $(red) "Computing sequencing profile for $*" $(end)
-	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(QCDIR)/$*")'
+	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(QCDIR)/$*", $(THREADS))'
 
 # Quality control pairend gzipped
 $(DATADIR)/$(QCDIR)/%.sam: $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(QCDIR) Refs

@@ -21,7 +21,7 @@ plot_depth <- function(stem, limit = 5)
 #'
 #' @export
 #' @param stem Stem name of the sam file
-create_profile <- function(stem)
+create_profile <- function(stem, threads)
 {
   paste0(stem, ".sam") %>%
     read_sam -> sam
@@ -29,7 +29,7 @@ create_profile <- function(stem)
   if (length(sam) > 0)
   {
     sam %>%
-      dplyr::mutate(parsed = cigar %>% parse_cigar) %>%
+      dplyr::mutate(parsed = cigar %>% parse_cigar(threads)) %>%
       tidyr::unnest(parsed) %>%
       read_depth %>%
       saveRDS(paste0(stem, ".rds"))
@@ -99,7 +99,7 @@ plot_final <- function(sam, summ, limit = 1)
 #' @export
 #' @param samfile A local alignment sam file
 #' @param fastafile The fasta file to write the result to
-extract_fasta <- function(samfile, fastafile)
+extract_fasta <- function(samfile, fastafile, threads)
 {
   samfile %>%
     read_sam -> sam
@@ -108,7 +108,7 @@ extract_fasta <- function(samfile, fastafile)
   {
     sam %>%
       dplyr::filter(grepl("S", cigar)) %>%
-      dplyr::mutate(parsed = cigar %>% parse_cigar,
+      dplyr::mutate(parsed = cigar %>% parse_cigar(threads),
                     parsed = purrr::map2(parsed, pos, extract_features)) %>%
       tidyr::unnest(parsed) %>%
       dplyr::filter(length_read > 25,
