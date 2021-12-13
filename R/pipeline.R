@@ -21,7 +21,7 @@ plot_depth <- function(stem, limit = 5)
 #'
 #' @export
 #' @param stem Stem name of the sam file
-create_profile <- function(stem, threads)
+create_profile <- function(stem, threads, consensus = F)
 {
   paste0(stem, ".sam") %>%
     read_sam -> sam
@@ -31,7 +31,7 @@ create_profile <- function(stem, threads)
     sam %>%
       dplyr::mutate(parsed = cigar %>% parse_cigar(threads)) %>%
       tidyr::unnest(parsed) %>%
-      read_depth %>%
+      read_depth(consensus = consensus) %>%
       saveRDS(paste0(stem, ".rds"))
   } else
   {

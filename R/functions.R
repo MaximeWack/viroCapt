@@ -22,8 +22,9 @@ read_sam <- function(filename)
 #' Tally the nucleotides for all positions
 #'
 #' @param sam sam file object (dataframe)
+#' @param consensus whether to compute consensus sequences or not
 #' @return A sequencing depth object
-read_depth <- function(sam)
+read_depth <- function(sam, consensus)
 {
   sam %>%
     dplyr::filter(type %in% c("M", "I")) %>%
@@ -42,34 +43,42 @@ read_depth <- function(sam)
        function(df)
        {
          size <- max(df$end)
-         depth <- data.frame(pos = 1:size,
-                             n = 0,
-                             A = 0,
-                             T = 0,
-                             G = 0,
-                             C = 0,
-                             consensus = "")
+         depth <- if (consensus) {data.frame(pos = 1:size, n = 0, A = 0, T = 0, G = 0, C = 0, consensus = "")
+         } else {data.frame(pos = 1:size, n = 0)}
 
          purrr::pwalk(list(df$start, df$end, df$subseq), function(start, end, subseq)
          {
            depth$n[start:end] <<- depth$n[start:end] + 1
-           depth$A[start:end] <<- depth$A[start:end] + (subseq == "A")
-           depth$T[start:end] <<- depth$T[start:end] + (subseq == "T")
-           depth$G[start:end] <<- depth$G[start:end] + (subseq == "G")
-           depth$C[start:end] <<- depth$C[start:end] + (subseq == "C")
+           if (consensus)
+           {
+             depth$A[start:end] <<- depth$A[start:end] + (subseq == "A")
+             depth$T[start:end] <<- depth$T[start:end] + (subseq == "T")
+             depth$G[start:end] <<- depth$G[start:end] + (subseq == "G")
+             depth$C[start:end] <<- depth$C[start:end] + (subseq == "C")
+           }
          })
 
-         mapply(function(n, a, t, g, c)
-         {
-           if (n == 0) "N"
-           else names(which.max(c(A = a, T = t, G = g, C = c)))
-           
-         }, depth$n, depth$A, depth$T, depth$G, depth$C) -> depth$consensus
+         if (consensus)
+           mapply(function(n, a, t, g, c)
+           {
+             if (n == 0) "N"
+             else names(which.max(c(A = a, T = t, G = g, C = c)))
+           }, depth$n, depth$A, depth$T, depth$G, depth$C) -> depth$consensus
 
          depth
        }) -> depths
 
-  tidyr::unnest(data.frame(genotype = names(depths), data = depths %>% unclass), cols = data)
+  data.frame(genotype = names(depths), data = depths %>% unclass) %>%
+    tidyr::unnest(cols = data) -> depths
+
+  depths %>%
+    dplyr::group_by(genotype) %>%
+    dplyr::summarise(avg_depth = mean(n)) %>%
+    dplyr::arrange(desc(avg_depth)) %>%
+    dplyr::pull(genotype) -> genotype_order
+
+  depths %>%
+    dplyr::mutate(genotype = genotype %>% factor(levels = genotype_order))
 }
 
 

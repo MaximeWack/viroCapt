@@ -115,7 +115,7 @@ $(DATADIR)/$(LOCALDIR)/%.png: $(DATADIR)/$(LOCALDIR)/%.rds
 # Profile
 $(DATADIR)/$(LOCALDIR)/%.rds: $(DATADIR)/$(LOCALDIR)/%.sam
 	@echo -e $(red) "Computing sequencing profile and consensus sequences for $*" $(end)
-	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(LOCALDIR)/$*", $(THREADS))'
+	Rscript -e 'viroCapt::create_profile("$(DATADIR)/$(LOCALDIR)/$*", $(THREADS), consensus = T)'
 
 ## Local alignment pairend gzipped
 $(DATADIR)/$(LOCALDIR)/%.sam: $(DATADIR)/$(GLOBALDIR)/%.tsv.sel $(DATADIR)/%.R1.fastq.gz $(DATADIR)/%.R2.fastq.gz | $(DATADIR)/$(LOCALDIR) Refs
