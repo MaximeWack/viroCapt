@@ -1,3 +1,19 @@
+* 3.2.0
+  
+** New features
+
+- compute a majority consensus sequence in the same loop and output it as a fasta file in $LOCALDIR
+
+** Changes
+
+- parallelize CIGAR parsing
+- run depth profile computation as a loop (should use less memory)
+- keep the computed local profile
+
+** Bugfix
+
+- rename HPV58_HPV58sc***.fasta files to conform to the standard naming pattern
+
 * 3.1.0
 
 - add a NEWS.org file to track changes between versions
