@@ -96,7 +96,9 @@ make DATADIR=fastq_samples LOCAL_PLOT_LIMIT=8 Local_plot
 The pipeline will print the output of every command as it is used, and will print execution milestones in red.\\
 All the analysis results will appear in the ~01_*~ to ~06_*~ folders within the folder containing the source ~fastq~ files.
 
-The bowtie index files for all references will be built as needed, as well as the download of the reference human genome from the UCSC, usually with the first run.
+On the first run, all references will be compiled in the ~HPVs.fasta~ file, then the bowtie indexes for all the references will be built.\\
+If you add/remove/modify/rename references, delete the ~HPVs.fasta~ and ~HPVs.*.bt2~ files and they will be rebuilt as well.\\
+The hg19 human genome reference will be downloaded from the UCSC on that first run too.
 
 ** Visualization
 

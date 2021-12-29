@@ -281,7 +281,13 @@ $(DATADIR)/$(QCDIR):
 ## Bowtie2 references
 
 # Build all the binary ref files
-Refs: $(patsubst refs/%.fasta, refs/%.1.bt2, $(wildcard refs/*.fasta))
+Refs: refs/HPVs.fasta $(patsubst refs/%.fasta, refs/%.1.bt2, $(wildcard refs/*.fasta))
+
+# Compiling the references
+refs/HPVs.fasta:
+	@echo -e $(red) "Compiling the references" $(end)
+	rm refs/HPVs.fasta -f
+	cat refs/HPV*.fasta > refs/HPVs.fasta
 
 # Build a binary ref file from fasta
 refs/%.1.bt2 refs/%.2.bt2 refs/%.3.bt2 refs/%.4.bt2 refs/%.rev.1.bt2 refs/%.rev.2.bt2: refs/%.fasta
