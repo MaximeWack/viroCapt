@@ -159,7 +159,7 @@ ggplot_depth <- function(depth)
     ggplot2::ggplot() +
     ggplot2::aes(x = pos, y = n) +
     ggplot2::geom_area() +
-    ggplot2::facet_grid(~genotype) +
+    ggplot2::facet_grid(~genotype, scales = "free_x") +
     ggplot2::theme(strip.text = ggplot2::element_text(angle = -90))
 }
 

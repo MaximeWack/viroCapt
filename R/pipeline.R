@@ -12,8 +12,10 @@ plot_depth <- function(stem, limit = 5)
       limit_genotypes(limit) %>%
       ggplot_depth -> Plot
 
+  num_plots <- max(2, min(limit, length(unique(sam$genotype))))
+  
     paste0(stem, ".png") %>%
-      ggplot2::ggsave(Plot)
+      ggplot2::ggsave(Plot, height = 7, width = 4 * num_plots)
 }
 
 
@@ -85,8 +87,10 @@ plot_final <- function(sam, summ, limit = 1)
     sam %>%
       ggplot_final(summ_blat) -> Plot
 
+    num_plots <- max(2, min(limit, length(unique(sam$genotype))))
+
     paste0(summ, ".png") %>%
-      ggplot2::ggsave(Plot)
+      ggplot2::ggsave(Plot, height = 7, width = 4 * num_plots)
   } else
   {
     cat(NULL, file = paste0(summ, ".png"))
