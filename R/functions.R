@@ -115,27 +115,6 @@ downsample <- function(depth, ratio = 5)
 }
 
 
-#' Compute moving average
-#'
-#' @param depths A nucleotide depth object
-#' @param window Half-size of the window
-#' @return A smoothed depth object
-MA <- function(depths, window)
-{
-  depths %>%
-    dplyr::filter(n > 0) %>%
-    split(.$genotype) %>%
-    lapply(function(x)
-           {
-             x %>%
-               dplyr::mutate(roll = pos %>% purrr::map_dbl(~mean(x$n[x$pos %in% seq(. - window, . + window)], na.rm = T))) %>%
-               tidyr::complete(pos = 1:max(pos, na.rm = T), fill = list(genotype = x$genotype %>% unique, roll = 0, n = 0))
-           }) %>%
-    dplyr::bind_rows() %>%
-    dplyr::mutate(n = roll)
-}
-
-
 #' Limit the number of genotypes in a sample
 #'
 #' @param depths A nucleotide depth object
