@@ -110,7 +110,7 @@ downsample <- function(depth, ratio = 5)
   depth %>%
     dplyr::mutate(pos = ( (pos / ratio) %>% ceiling) * ratio) %>%
     dplyr::group_by(genotype, pos) %>%
-    dplyr::summarise(n = mean(n, na.rm = T)) %>%
+    dplyr::summarise(n = mean(n)) %>%
     dplyr::ungroup()
 }
 

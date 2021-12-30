@@ -10,6 +10,7 @@ plot_depth <- function(stem, limit = 5)
 
     sam %>%
       limit_genotypes(limit) %>%
+      downsample(10) %>%
       ggplot_depth -> Plot
 
   num_plots <- max(2, min(limit, length(unique(sam$genotype))))
@@ -85,6 +86,7 @@ plot_final <- function(sam, summ, limit = 1)
       dplyr::semi_join(sam, by = "genotype") -> summ_blat
 
     sam %>%
+      downsample(10) %>%
       ggplot_final(summ_blat) -> Plot
 
     num_plots <- max(2, min(limit, length(unique(sam$genotype))))
