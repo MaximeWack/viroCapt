@@ -35,12 +35,14 @@ server <- function(input, output, session)
 
   ## Downsample the depth information
   downsampled_depths <- reactive({
+    req(sam())
+    
     sam() %>% viroCapt:::downsample(10)
   })
 
   ## Filter the depths for the selected genotypes
   depths <- reactive({
-    req(input$genotype)
+    req(input$genotype, downsampled_depths())
 
     downsampled_depths() %>%
       dplyr::filter(genotype %in% input$genotype)
@@ -48,11 +50,15 @@ server <- function(input, output, session)
 
   ## Base depth plot
   localplot <- reactive({
+    req(depths())
+    
     viroCapt:::ggplot_depth(depths())
   })
 
   ## Output the annotated plot
   output$plot <- plotly::renderPlotly({
+    req(localplot())
+    
     max(depths()$n) -> max_n
 
     if (input$scores %>% is.null)
@@ -77,7 +83,7 @@ server <- function(input, output, session)
 
   ## Extract the blat summary
   summ_blat_file <- reactive({
-    req(visu())
+    req(visu()$summary)
 
     visu()$summary %>%
       dplyr::mutate(quality = quality %>% forcats::fct_drop())
@@ -85,10 +91,14 @@ server <- function(input, output, session)
 
   ## Filter the blat summary results on genotype, chr, nreads, score, and match
   summ_blat <- reactive({
+    req(summ_blat_file(), input$nreads, input$match)
+    
     summ_blat_file() %>%
-      dplyr::filter(genotype %in% input$genotype,
-                    n >= input$nreads,
+      dplyr::filter(n >= input$nreads,
                     match >= input$match) -> summ
+
+    if (! input$genotype %>% is.null)
+      summ %>% dplyr::filter(genotype %in% input$genotype) -> summ
 
     if (! input$chrs %>% is.null)
       summ %>% dplyr::filter(chr %in% input$chrs) -> summ
@@ -102,6 +112,8 @@ server <- function(input, output, session)
   ## Output the table
   output$table <- DT::renderDataTable(
   {
+    req(summ_blat())
+    
     summ_blat() %>%
       dplyr::mutate_at(vars(feature, chr, quality), factor)
   },
@@ -116,6 +128,8 @@ server <- function(input, output, session)
   # Update UI values
 
   observe({
+    req(sam())
+    
     sam() %>%
       dplyr::group_by(genotype) %>%
       dplyr::summarise(n = max(n)) %>%
@@ -128,6 +142,8 @@ server <- function(input, output, session)
   })
 
   observe({
+    req(summ_blat_file())
+    
     updateSelectizeInput(session, "scores", choices = summ_blat_file()$quality %>% UIlabels)
     updateSelectizeInput(session, "chrs", choices = summ_blat_file()$chr %>% UIlabels)
     updateSliderInput(session, "nreads", min = summ_blat_file()$n %>% min, max = summ_blat_file()$n %>% max)
